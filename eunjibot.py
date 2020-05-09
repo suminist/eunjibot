@@ -7,7 +7,7 @@ import json
 from bs4 import BeautifulSoup as bSoup
 import requests
 
-token = 'NzA3NDU1NDAyNzQ0MjE3NjEw.XrJD9A.F3rIeY89Mk230LHmRRktbifuwU0'
+token = 'smileyfacehaha'
 gToken = 'abc'
 client = commands.Bot(command_prefix = '~')
 
@@ -16,24 +16,7 @@ client = commands.Bot(command_prefix = '~')
 async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=discord.Game('with you~'))
     print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
-    print('<.<.<=====XXXXX=X===X=XX===X=XXXXX=X=XXXXX=XXXXX=XXXXX====>.>.>')
-    print('<.<.<=====X=====X===X=X=X==X===X=====X===X=X===X===X======>.>.>')
-    print('<.<.<=====XXXXX=X===X=X==X=X===X===X=XXXX==X===X===X======>.>.>')
-    print('<.<.<=====X=====X===X=X===XX=X=X===X=X===X=X===X===X======>.>.>')
-    print('<.<.<=====XXXXX=XXXXX=X===XX=XXX===X=XXXX==XXXXX===X======>.>.>')
-    print('<.<.<=====================================================>.>.>')
 
-@client.command(aliases=['lyrics'])
-async def _lyrics(ctx):
-    responses = [
-        'i love you jesus', 
-        'doesnt matter if youre from the hood',
-        'Jesus my superstar',
-        'You give me reason, you give me hope',
-        'nigga nigga nigga nigga nigga nigga nigga, im 100% nigga',
-        'There was a time I overdosed, and i was lifted, not by the ambulance, But by the holy ghost'
-    ]
-    await ctx.send(random.choice(responses))
 
 @client.command(aliases=['memes'])
 async def _memes(ctx):
