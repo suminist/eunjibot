@@ -1,0 +1,3 @@
+git+https://github.com/twicesanamana/eunjibot.git
+beautifulsoup4
+git+https://github.com/Rapptz/discord.py
