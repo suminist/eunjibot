@@ -11,10 +11,17 @@ token = 'NzA3NDU1NDAyNzQ0MjE3NjEw.XrcuXg.DpJ3zCZ6yD-6BAQURvps1YPM8EM'
 gToken = 'abc'
 client = commands.Bot(command_prefix = '~')
 
+status = cycle(['running 24/7', 'use ~helpme for a list of commands'])
+
+@tasks.loop(seconds=10)
+async def change_status():
+    await client.change_presence(status=discord.Status.online, activity=discord.Game(next(status)))
+
+
+
 #bot m
 @client.event
 async def on_ready():
-    await client.change_presence(status=discord.Status.online, activity=discord.Game('running 24/7'))
     print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
 
 # @client.command()
