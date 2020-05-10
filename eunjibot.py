@@ -14,9 +14,20 @@ client = commands.Bot(command_prefix = '~')
 #bot m
 @client.event
 async def on_ready():
-    await client.change_presence(status=discord.Status.online, activity=discord.Game('with you~'))
+    await client.change_presence(status=discord.Status.online, activity=discord.Game('running 24/7'))
     print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
 
+# @client.command()
+# async def load(ctx, extension):
+#     client.load_extension(f'cogs.{extension}')
+
+# @client.command()
+# async def unload(ctx, extension):
+#     client.unload_extension(f'cogs.{extension}')
+
+# for filename in os.listdir('./cogs'):
+#     if filename.endswith('.py'):
+#         client.load_extension(f'cogs.{filename[:-3]}')
 
 @client.command(aliases=['memes'])
 async def _memes(ctx):
@@ -63,75 +74,6 @@ async def _maggie(ctx):
 # <:emote_name:emote_ID>
 # <@!user_ID>
 # <@&role_ID>
-
-@client.event
-async def on_message(message):
-
-    splt = str(message.author.display_name) #nickname
-    tag_id = str(message.author.id)         #discord ID
-    msg_n = message.content.lower()    #message.content
-
-    hello_b = [
-        f'Hi there {splt}',
-        f"What's up {splt}"
-    ]
-
-    if 'i love you jesus' in msg_n and splt == 'jenjen':
-        await message.channel.send(f'shut the fuck up you ugly hoe {splt} https://cdn.discordapp.com/attachments/703066838547824760/705229430917955644/image0.jpg')
-
-    elif msg_n.startswith('i love you jesus') and splt == 'lil maggot':
-        await message.channel.send(f'shut the fuck up you ugly hoe {splt} https://imgur.com/FCNVmW6')
-
-    elif msg_n.startswith('i love you jesus') and tag_id == '371068945785946122':
-        await message.channel.send(f"smh stop supporting maggie {splt} https://imgur.com/lytOnrm")
-    elif msg_n.startswith('!p i love you jesus') and splt == 'nazi':
-        await message.channel.send(f'pls delete that or i will come to your house :) <:angryface:699162039490314282> https://imgur.com/lytOnrm')
-
-    elif msg_n.startswith('i love you jesus'):
-        await message.channel.send(f'shut the fuck up {splt}')
-    
-    elif 'kavi' in msg_n:
-        await message.channel.send('kavi is a nigger')
-
-    elif 'is high' in msg_n: #easter egg
-        await message.channel.send('https://www.youtube.com/watch?v=fpSTrry_5Fo')
-    
-    elif 'i love you eunji' in msg_n:
-        await message.channel.send(f'i love you too {splt} :flushed:')
-        await message.add_reaction('\N{HEAVY BLACK HEART}')
-
-    elif 'bottoms up' in msg_n:
-        await message.add_reaction('<:zxdalgisoju:666374702293450817>')   
-    
-    elif 'depressed' in msg_n:
-        await message.channel.send(f"its ok {splt}, I'll be there for you")
-        await message.channel.send('<:eunjiface:707716555538038875>')
-
-    elif 'hug me' in msg_n:
-        await message.channel.send(f'*hugs {splt}*')
-        await message.channel.send('<:pandahug:707726416065593355>')
-        await message.add_reaction('<:qwerH:694071780318511124>')
-        await message.add_reaction('<:qwerE:694071780348002334>')
-        await message.add_reaction('<:qwerM:694071780389683200>')
-        await message.add_reaction('<:qwerI:694071780419043368>')
-        await message.add_reaction('<:qwerS:694071780419174490>')
-
-    elif 'thanks eunji' in msg_n:
-        await message.channel.send(f"you're welcome {splt} :)")
-
-    elif "why doesn't anyone love me" in msg_n:
-        await message.channel.send(f"its because you're ugly, {splt}")
-
-    elif '<@!707455402744217610>' in msg_n:
-        await message.channel.send("I'm busy right now :/ ping me again later")
-
-    elif 'eunji' in msg_n:
-        await message.channel.send(random.choice(hello_b))
-
-
-    
-
-    await client.process_commands(message)
 
 @client.command(aliases=['goodnight'])
 async def _goodnight(ctx):
@@ -201,8 +143,8 @@ async def _latestcb(ctx):
 
     await ctx.send(embed=embed_IU)
 
-@client.command(aliases=['beetest'])
-async def _beetest(ctx, *, msg):
+@client.command(aliases=['apink'])
+async def _apink(ctx, *, msg):
 
     members= ['eunji', 'bomi', 'hayoung', 'naeun', 'namjoo', 'chorong']
 
@@ -235,21 +177,38 @@ async def _beetest(ctx, *, msg):
 async def _supersecretcommandthatnobodywillknowbecauseitssolong(ctx):
     await ctx.send("Eunji ultimate bias 5 years poggers")
 
-@client.command(aliases=['apinklyc'])
-async def _apinklyc(ctx, *, msg):
+# @client.command(aliases=['opggteam'])
+# async def _opggteam(ctx, *, msg):
 
-    rmv = msg.strip().lower()
-
-    link = f'https://www.azlyrics.com/lyrics/apink/{rmv}.html'
-
-    source = requests.get(link).text
-    soup = bSoup(source, 'lxml')
-
-    find_i = soup.find('div').i
-
-    print(find_i)
-
+@client.event
+async def on_message(message):
     
+    splt = str(message.author.display_name) #nickname
+    # tag_id = str(message.author.id)         #discord ID
+    msg_n = message.content.lower()    #message.content
+
+    if 'is high' in msg_n: #easter egg
+        await message.channel.send('https://www.youtube.com/watch?v=fpSTrry_5Fo')
+        
+    elif 'i love you eunji' in msg_n:
+        await message.channel.send(f'i love you too {splt} :flushed:')
+        await message.add_reaction('\N{HEAVY BLACK HEART}') 
+        
+    elif 'depressed' in msg_n:
+        await message.channel.send(f"its ok {splt}, I'll be there for you")
+        await message.channel.send('<:eunjiface:707716555538038875>')
+
+    elif 'hug me' in msg_n:
+        await message.channel.send(f'*hugs {splt}*')
+        await message.channel.send('<:pandahug:707726416065593355>')
+
+    elif 'thanks eunji' in msg_n:
+        await message.channel.send(f"you're welcome {splt} :)")
+
+    elif '<@!707455402744217610>' in msg_n:
+        await message.channel.send("I'm busy right now :/ ping me again later")
+
+    await client.process_commands(message)
 
 @client.command(aliases=['helpme'])
 async def _helpme(ctx):
@@ -264,30 +223,6 @@ async def _helpme(ctx):
     embed.add_field(name='latestcb', value='Sends the latest girl/girl group comeback', inline=False)
     await ctx.send(embed=embed)
 
-@client.command()
-@commands.has_permissions(administrator=True)
-async def mute(ctx, member: discord.Member=None):
-    if not member:
-        await ctx.send("Please specify a member")
-        return
-    role = discord.utils.get(ctx.guild.roles, name="muted")
-    await member.add_roles(role)
-@mute.error
-async def mute_error(ctx, error):
-    if isinstance(error, commands.CheckFailure):
-        await ctx.send("You are not allowed to mute people")
 
-@client.command()
-@commands.has_permissions(administrator=True)
-async def unmute(ctx, member: discord.Member=None):
-    if not member:
-        await ctx.send("Please specify a member")
-        return
-    role = discord.utils.get(ctx.guild.roles, name="muted")
-    await member.remove_roles(role)
-@mute.error
-async def unmute_error(ctx, error):
-    if isinstance(error, commands.CheckFailure):
-        await ctx.send("You are not allowed to unmute people")
 
 client.run(token)
