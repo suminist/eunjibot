@@ -78,11 +78,14 @@ async def _maggie(ctx):
 
 @client.command(aliases=['goodnight'])
 async def _goodnight(ctx):
-    iuwu = [
-        'https://tenor.com/view/iu-cute-hug-sleeping-gif-15049574',
-        'https://tenor.com/view/iu-sleep-sleepy-sleeping-tired-gif-12177560'
-    ]
-    await ctx.send(random.choice(iuwu))
+    # id = discord.Client(get_guild())
+    channels = ['general']
+    if ctx in channels:
+        iuwu = [
+            'https://tenor.com/view/iu-cute-hug-sleeping-gif-15049574',
+            'https://tenor.com/view/iu-sleep-sleepy-sleeping-tired-gif-12177560'
+        ]
+        await ctx.send(random.choice(iuwu))
 
 @client.command(aliases=['emb1'])
 async def _emb1(ctx):
