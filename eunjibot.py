@@ -18,9 +18,6 @@ status = cycle(['running 24/7', 'use ~helpme for a list of commands'])
 async def on_ready():
     print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
 
-@tasks.loop(seconds=10)
-async def no_offline():
-    print('banana')
 # @client.command()
 # async def load(ctx, extension):
 #     client.load_extension(f'cogs.{extension}')
@@ -176,6 +173,55 @@ async def _apink(ctx, *, msg):
 
             await ctx.send(embed=embed_kp)
             break
+
+@client.command(aliases=['izone'])
+async def _izone(ctx, *, msg):
+
+    izone = {
+    'chaeyeon': 'https://kprofiles.com/lee-chaeyeon-izone-profile-facts/',
+    'eunbi': 'https://kprofiles.com/kwon-eunbi-izone-profile-facts/',
+    'sakura': 'https://kprofiles.com/miyawaki-sakura-izonehkt48-profile-facts/',
+    'hyewon': 'https://kprofiles.com/kang-hyewon-izone-profile-facts/',
+    'yena': 'https://kprofiles.com/choi-yena-izone-profile-facts/',
+    'chaewon': 'https://kprofiles.com/kim-chaewon-profile-facts/',
+
+    'minjoo': 'https://kprofiles.com/kim-minjoo-izone-profile-facts/',
+    'minju': 'https://kprofiles.com/kim-minjoo-izone-profile-facts/',
+    
+    'nako': 'https://kprofiles.com/yabuki-nako-izonehkt48-profile-facts/',
+    'hitomi': 'https://kprofiles.com/honda-hitomi-izoneakb48-profile-facts/',
+    'yuri': 'https://kprofiles.com/jo-yuri-izone-profile-facts/',
+    'yujin': 'https://kprofiles.com/ahn-yujin-izone-profile-facts/',
+    'wonyoung': 'https://kprofiles.com/jang-wonyoung-izone-profile-facts/'
+    }
+
+    link = izone.get(msg.lower())
+
+    if link == None:
+        await ctx.send('Oops, maybe spelt something wrong?') 
+    
+    else:
+        emb_title = 'Member Profile'
+
+        source = requests.get(link).text
+        soup = bSoup(source, 'lxml')
+
+        kp_f = soup.find('div', class_='entry-content').p.text #print these facts
+
+        kp_jpg = soup.find('div', class_='entry-content').img
+        kp_src = kp_jpg['src'] #print this image
+
+        embed_kp = discord.Embed(
+            title = emb_title,
+            color = 0xD609DD
+        )
+
+        embed_kp.add_field(name='Info', value=kp_f)
+        embed_kp.set_image(url=kp_src)
+        embed_kp.add_field(name='Profile Link', value=link, inline=False)    
+
+        await ctx.send(embed=embed_kp)
+
 
 @client.command(aliases=['supersecretcommandthatnobodywillknowbecauseitssolong'])
 async def _supersecretcommandthatnobodywillknowbecauseitssolong(ctx):
