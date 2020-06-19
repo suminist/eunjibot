@@ -7,6 +7,8 @@ import json
 from bs4 import BeautifulSoup as bSoup
 import requests
 
+from bot_commands.bot_commands import BotCommands
+
 token = 'NzA3NDU1NDAyNzQ0MjE3NjEw.XrcuXg.DpJ3zCZ6yD-6BAQURvps1YPM8EM'
 gToken = 'abc'
 client = commands.Bot(command_prefix = '~')
