@@ -11,9 +11,7 @@ from bot_commands.bot_commands import BotCommands
 
 token = 'NzA3NDU1NDAyNzQ0MjE3NjEw.XrcuXg.DpJ3zCZ6yD-6BAQURvps1YPM8EM'
 gToken = 'abc'
-client = commands.Bot(command_prefix = '~')
-
-status = cycle(['running 24/7', 'use ~helpme for a list of commands'])
+client = commands.Bot(command_prefix = '~', activity = discord.Game("Eunji bot clone for testing"))
 
 #bot m
 @client.event
