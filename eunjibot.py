@@ -1,16 +1,8 @@
 import discord
 from discord.ext import commands, tasks
-import os
-import random
-from itertools import cycle
-import json
-from bs4 import BeautifulSoup as bSoup
-import requests
-
 from bot_commands.bot_commands import BotCommands
+from secret_keys import DISCORD_BOT_TOKEN
 
-token = 'NzA3NDU1NDAyNzQ0MjE3NjEw.XrcuXg.DpJ3zCZ6yD-6BAQURvps1YPM8EM'
-gToken = 'abc'
 client = commands.Bot(command_prefix = '~', activity = discord.Game("Eunji bot clone for testing"))
 
 #bot m
@@ -35,6 +27,8 @@ BotCommands(client)
 @client.event
 async def on_message(message):
     
+    print(f'Message from {message.author.id} in channel {message.channel.id} in server {message.guild.id}')
+
     splt = str(message.author.display_name) #nickname
     # tag_id = str(message.author.id)         #discord ID
     msg_n = message.content.lower()    #message.content
@@ -63,4 +57,4 @@ async def on_message(message):
     await client.process_commands(message)
 
 
-client.run(token)
+client.run(DISCORD_BOT_TOKEN)
