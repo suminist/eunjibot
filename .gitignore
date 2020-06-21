@@ -1,0 +1,5 @@
+
+.env
+*.pyc
+*.pyo
+.vscode/settings.json

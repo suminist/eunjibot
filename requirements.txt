@@ -1,4 +1,7 @@
 beautifulsoup4
-git+https://github.com/Rapptz/discord.py
+discord
 requests
 lxml
+pylast
+python-dotenv
+pymongo

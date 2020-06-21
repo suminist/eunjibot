@@ -7,6 +7,8 @@ import json
 from bs4 import BeautifulSoup as bSoup
 import requests
 
+from .lastfm import LastFM
+
 class BotCommands:
     def __init__(self, client):
 
@@ -16,7 +18,8 @@ class BotCommands:
             Ban(),
             Apink(),
             Izone(),
-            HelpMe()
+            HelpMe(),
+            LastFM()
         ]
         
         for command in self.command_list:
@@ -24,6 +27,8 @@ class BotCommands:
             print(f"Loaded {command.name}")
 
         print('Finished loading all bot_commands')
+
+        client.get_command('help').enabled = False
 
 class GoodNight(commands.core.Command):
     def __init__(self):
