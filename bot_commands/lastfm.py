@@ -6,7 +6,7 @@ from secret_keys import LF_API_KEY, LF_API_SECRET, MONGODB_CONNECTION
 
 import pymongo
 myclient = pymongo.MongoClient(MONGODB_CONNECTION)
-users = myclient.users.info
+users = myclient.overall.users
 
 network = pylast.LastFMNetwork(api_key=LF_API_KEY, api_secret=LF_API_SECRET)
 
