@@ -5,3 +5,4 @@ lxml
 pylast
 python-dotenv
 pymongo
+dnspython
