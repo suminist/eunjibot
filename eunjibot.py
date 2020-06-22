@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands, tasks
 from bot_commands.bot_commands import BotCommands
+from cogs.management import Management
+
 from secret_keys import DISCORD_BOT_TOKEN
 
 client = commands.Bot(command_prefix = '~', activity = discord.Game("Eunji bot clone for testing"))
@@ -23,11 +25,13 @@ async def on_ready():
 #         client.load_extension(f'cogs.{filename[:-3]}')
 
 BotCommands(client)
+client.add_cog(Management(client))
 
 @client.event
 async def on_message(message):
     
     print(f'Message from {message.author.id} in channel {message.channel.id} in server {message.guild.id}')
+    print(message.content)
 
     splt = str(message.author.display_name) #nickname
     # tag_id = str(message.author.id)         #discord ID
