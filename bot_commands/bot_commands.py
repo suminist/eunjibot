@@ -15,7 +15,6 @@ class BotCommands:
         self.command_list = [
             GoodNight(),
             WhatsLunch(),
-            Ban(),
             Apink(),
             Izone(),
             HelpMe(),
@@ -59,14 +58,6 @@ class WhatsLunch(commands.core.Command):
         ]
 
         await ctx.send(random.choice(lunch))
-
-class Ban(commands.core.Command):
-    def __init__(self):
-        commands.core.Command.__init__(self, self.function)
-        self.name = 'ban'
-
-    async def function(self, ctx):
-        await ctx.send('Please add a user ID in order to execute the command')
 
 class Apink(commands.core.Command):
     def __init__(self):
