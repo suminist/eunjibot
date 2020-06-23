@@ -16,7 +16,7 @@ class Management(commands.Cog):
             return
 
         if len(args) == 0:
-            await ctx.send('Please enter the user to ban')
+            await ctx.send('Please enter the user to ban.')
             return
 
         try:
@@ -25,9 +25,13 @@ class Management(commands.Cog):
             await ctx.send(e)
             return
         
+        if member_to_ban.top_role.position >= ctx.author.top_role.position:
+            await ctx.send('You cannot ban a member who is not lower than you.')
+            return
+
         try:
             await member_to_ban.ban(reason='Test')
-            await ctx.send(f'User {member_to_ban.display_name} has been banned')
+            await ctx.send(f'User {member_to_ban.display_name} has been banned.')
             return
         except Exception as e:
             await ctx.send(e)
@@ -45,7 +49,7 @@ class Management(commands.Cog):
             return
 
         if len(args) == 0:
-            await ctx.send('Please enter the user to kick')
+            await ctx.send('Please enter the user to kick.')
             return
 
         try:
@@ -54,9 +58,13 @@ class Management(commands.Cog):
             await ctx.send(e)
             return
         
+        if member_to_kick.top_role.position >= ctx.author.top_role.position:
+            await ctx.send('You cannot kick a member who is not lower than you.')
+            return
+
         try:
             await member_to_kick.kick(reason='Test')
-            await ctx.send(f'User {member_to_kick.display_name} has been kicked')
+            await ctx.send(f'User {member_to_kick.display_name} has been kicked.')
         except Exception as e:
             await ctx.send(e)
             return
@@ -73,7 +81,17 @@ class Management(commands.Cog):
             return
 
         if len(args) == 0:
-            await ctx.send('Please enter the user to mute')
+            await ctx.send('Please enter the user to mute.')
+            return
+
+        try:
+            member_to_mute = await commands.MemberConverter().convert(ctx, args[0])
+        except Exception as e:
+            await ctx.send(e)
+            return
+
+        if member_to_mute.top_role.position >= ctx.author.top_role.position:
+            await ctx.send('You cannot mute a member who is not lower than you.')
             return
 
         mute_role = None
@@ -81,12 +99,6 @@ class Management(commands.Cog):
             if role.name.lower() == 'mute':
                 mute_role = role
                 break
-
-        try:
-            member_to_mute = await commands.MemberConverter().convert(ctx, args[0])
-        except Exception as e:
-            await ctx.send(e)
-            return
 
         if mute_role == None:
             try:
@@ -105,7 +117,7 @@ class Management(commands.Cog):
 
         try:
             await member_to_mute.add_roles(mute_role)
-            await ctx.send(f'User {member_to_mute.display_name} has been muted')
+            await ctx.send(f'User {member_to_mute.display_name} has been muted.')
 
         except Exception as e:
             await ctx.send(e)
