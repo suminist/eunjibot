@@ -7,34 +7,12 @@ import json
 from bs4 import BeautifulSoup as bSoup
 import requests
 
-from .lastfm import LastFM
+class Misc(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-class BotCommands:
-    def __init__(self, client):
-
-        self.command_list = [
-            GoodNight(),
-            WhatsLunch(),
-            Apink(),
-            Izone(),
-            HelpMe(),
-            LastFM()
-        ]
-        
-        for command in self.command_list:
-            client.add_command(command)
-            print(f"Loaded {command.name}")
-
-        print('Finished loading all bot_commands')
-
-        client.get_command('help').enabled = False
-
-class GoodNight(commands.core.Command):
-    def __init__(self):
-        commands.core.Command.__init__(self, self.function)
-        self.name = 'goodnight'
-
-    async def function(self, ctx):
+    @commands.command()
+    async def goodnight(self, ctx):
 
         iuwu = [
             'https://tenor.com/view/iu-cute-hug-sleeping-gif-15049574',
@@ -42,12 +20,8 @@ class GoodNight(commands.core.Command):
         ]
         await ctx.send(random.choice(iuwu))
 
-class WhatsLunch(commands.core.Command):
-    def __init__(self):
-        commands.core.Command.__init__(self, self.function)
-        self.name = 'whatslunch'
-
-    async def function(self, ctx):
+    @commands.command()
+    async def whatslunch(self, ctx):
 
         lunch = [
             'Pasta',
@@ -56,15 +30,10 @@ class WhatsLunch(commands.core.Command):
             'Some fruits',
             'Mcdonalds'
         ]
-
         await ctx.send(random.choice(lunch))
-
-class Apink(commands.core.Command):
-    def __init__(self):
-        commands.core.Command.__init__(self, self.function)
-        self.name = 'apink'
-
-    async def function(self, ctx, *, msg):
+    
+    @commands.command()
+    async def apink(self, ctx, *, msg):
 
         members= ['eunji', 'bomi', 'hayoung', 'naeun', 'namjoo', 'chorong']
 
@@ -93,12 +62,8 @@ class Apink(commands.core.Command):
                 await ctx.send(embed=embed_kp)
                 break
 
-class Izone(commands.core.Command):
-    def __init__(self):
-        commands.core.Command.__init__(self, self.function)
-        self.name = 'izone'
-
-    async def function(self, ctx, *, msg):
+    @commands.command()
+    async def izone(self, ctx, *, msg):
 
         izone = {
         'chaeyeon': 'https://kprofiles.com/lee-chaeyeon-izone-profile-facts/',
@@ -145,12 +110,8 @@ class Izone(commands.core.Command):
 
             await ctx.send(embed=embed_kp)
 
-class HelpMe(commands.core.Command):
-    def __init__(self):
-        commands.core.Command.__init__(self, self.function)
-        self.name = 'helpme'
-    
-    async def function(self, ctx):
+    @commands.command()
+    async def helpme(self, ctx):
         embed = discord.Embed(
             title = 'List of Commands',
             description = 'Bot Prefix: -',
@@ -161,3 +122,48 @@ class HelpMe(commands.core.Command):
         embed.add_field(name='goodnight', value='Sends you 1 out of 2 goodnight gif', inline=False)
         embed.add_field(name='latestcb', value='Sends the latest girl/girl group comeback', inline=False)
         await ctx.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        print(f'Message from {message.author.id} in channel {message.channel.id} in server {message.guild.id}')
+        print(message.content)
+
+        splt = str(message.author.display_name) #nickname
+        # tag_id = str(message.author.id)         #discord ID
+        msg_n = message.content.lower()    #message.content
+
+        if 'is high' in msg_n: #easter egg
+            await message.channel.send('https://www.youtube.com/watch?v=fpSTrry_5Fo')
+            
+        elif 'i love you eunji' in msg_n:
+            await message.channel.send(f'i love you too {splt} :flushed:')
+            await message.add_reaction('\N{HEAVY BLACK HEART}') 
+            
+        elif 'depressed' in msg_n:
+            await message.channel.send(f"its ok {splt}, I'll be there for you")
+            await message.channel.send('<:eunjiface:707716555538038875>')
+
+        elif 'hug me' in msg_n:
+            await message.channel.send(f'*hugs {splt}*')
+            await message.channel.send('<:pandahug:707726416065593355>')
+
+        elif 'thanks eunji' in msg_n:
+            await message.channel.send(f"you're welcome {splt} :)")
+
+        elif '<@!707455402744217610>' in msg_n:
+            await message.channel.send("I'm busy right now :/ ping me again later")
+
+        elif 'sing' in msg_n and 'eunji' in msg_n:
+            videos = [
+                'https://www.youtube.com/watch?v=nzDO6tAB6ng',
+                'https://www.youtube.com/watch?v=PWDISJZr7Yc',
+                'https://www.youtube.com/watch?v=tUUk7ktOy4Y',
+                'https://www.youtube.com/watch?v=S20j3sTDZT0',
+                'https://www.youtube.com/watch?v=ugh3W-D-tqk',
+                'https://www.youtube.com/watch?v=otrquLJGX6c'
+            ]
+            await message.channel.send(random.choice(videos))
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
