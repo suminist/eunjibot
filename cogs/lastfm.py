@@ -10,13 +10,15 @@ users = myclient.overall.users
 
 network = pylast.LastFMNetwork(api_key=LF_API_KEY, api_secret=LF_API_SECRET)
 
-class LastFM(commands.core.Command):
-    def __init__(self):
-        commands.core.Command.__init__(self, self.function)
-        self.name = 'lastfm'
-        self.aliases = ['lf']
+import discord
+from discord.ext import commands
 
-    async def function(self, ctx, *args):
+class LastFM(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(aliases=['lf'])
+    async def lastfm(self, ctx, *args):
         if len(args) == 0:
             await self._now_playing(ctx, args[1:])
         elif args[0] in ['ta', 'topartists']:
@@ -28,7 +30,7 @@ class LastFM(commands.core.Command):
 
     async def _top_artists(self, ctx, args):
         author_id = ctx.message.author.id
-        username = self._db_get_username(author_id)
+        username = _db_get_username(author_id)
 
         if username == None:
             await ctx.send('Please register your username with `lf set username`')
@@ -79,7 +81,7 @@ class LastFM(commands.core.Command):
 
     async def _now_playing(self, ctx, args):
         author_id = ctx.message.author.id
-        username = self._db_get_username(author_id)
+        username = _db_get_username(author_id)
 
         if username == None:
             await ctx.send('Please register your username with `lf set username`')
@@ -101,24 +103,26 @@ class LastFM(commands.core.Command):
         author_id = ctx.message.author.id
         username = args[0]
 
-        self._db_set_username(author_id, username)
+        _db_set_username(author_id, username)
         await ctx.send(f"Set username to {username}")
 
-    def _db_set_username(self, id, username):
-        user = users.find_one({"id": f"{id}"})
+# database functions below
 
-        if user == None:
-            newvalues = { "id" : f"{id}", "lfUsername": username}
-            users.insert_one(newvalues)
-        else:
-            myquery = { "id": f"{id}" }
-            newvalues = { "$set": { "lfUsername": username } }
-            users.update_one(myquery, newvalues)
+def _db_set_username(id, username):
+    user = users.find_one({"id": f"{id}"})
 
-    def _db_get_username(self, id):
-        try:
-            username = users.find_one({"id": f"{id}"})['lfUsername']
-            return username
-        except Exception as e:
-            print(e)
-            return None
+    if user == None:
+        newvalues = { "id" : f"{id}", "lfUsername": username}
+        users.insert_one(newvalues)
+    else:
+        myquery = { "id": f"{id}" }
+        newvalues = { "$set": { "lfUsername": username } }
+        users.update_one(myquery, newvalues)
+
+def _db_get_username(id):
+    try:
+        username = users.find_one({"id": f"{id}"})['lfUsername']
+        return username
+    except Exception as e:
+        print(e)
+        return None
