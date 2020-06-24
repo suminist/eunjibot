@@ -5,7 +5,7 @@ import json
 
 from secret_keys import OPENWEATHER_API_KEY
 
-class Weather(commands.Cog):
+class WeatherCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
