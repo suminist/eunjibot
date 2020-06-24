@@ -13,7 +13,7 @@ network = pylast.LastFMNetwork(api_key=LF_API_KEY, api_secret=LF_API_SECRET)
 import discord
 from discord.ext import commands
 
-class LastFM(commands.Cog):
+class LastFmCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
