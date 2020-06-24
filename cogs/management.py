@@ -37,7 +37,6 @@ class Management(commands.Cog):
             await ctx.send(e)
             return
 
-
     @commands.command()
     async def kick(self, ctx, *args):
         if ctx.author.guild_permissions.kick_members == False:
@@ -69,7 +68,6 @@ class Management(commands.Cog):
             await ctx.send(e)
             return
 
-    
     @commands.command()
     async def mute(self, ctx, *args):
         if ctx.author.guild_permissions.manage_roles == False:
@@ -121,4 +119,29 @@ class Management(commands.Cog):
 
         except Exception as e:
             await ctx.send(e)
+            return
+
+    @commands.command()
+    async def purge(self, ctx, *args):
+        if ctx.author.guild_permissions.administrator == False:
+            await ctx.send('You must be an administrator to purge.')
+            return
+  
+        if len(args) == 0:
+            await ctx.send('Please enter the number of messages to purge.')
+            return
+
+        try:
+            number_of_messages = int(args[0])
+            if number_of_messages <= 0:
+                raise "Negative input"
+        except Exception as e:
+            print(e)
+            await ctx.send('Your input must be a positive integer.')
+            return
+
+        try:
+            await ctx.channel.purge(limit=number_of_messages)
+            await ctx.send(f'Purged {args[0]} messages.')
+        except Exception as e:
             return
