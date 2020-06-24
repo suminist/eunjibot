@@ -135,13 +135,17 @@ class Management(commands.Cog):
             number_of_messages = int(args[0])
             if number_of_messages <= 0:
                 raise Exception('Negative input')
+            elif number_of_messages > 100:
+                raise Exception('Over 100 input')
         except Exception as e:
             print(e)
-            await ctx.send('Your input must be a positive integer.')
+            await ctx.send('Your input must be an integer from 1 to 100.')
             return
 
         try:
             await ctx.channel.purge(limit=number_of_messages)
-            await ctx.send(f'Purged {args[0]} messages.')
+            alert_message = await ctx.send(f'Purged {args[0]} messages.')
+            await alert_message.delete(delay=10)
         except Exception as e:
+            await ctx.send(e)
             return
