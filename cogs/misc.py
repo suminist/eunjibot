@@ -7,7 +7,7 @@ import json
 from bs4 import BeautifulSoup as bSoup
 import requests
 
-class Misc(commands.Cog):
+class MiscCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
