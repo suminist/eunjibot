@@ -134,7 +134,7 @@ class Management(commands.Cog):
         try:
             number_of_messages = int(args[0])
             if number_of_messages <= 0:
-                raise "Negative input"
+                raise Exception('Negative input')
         except Exception as e:
             print(e)
             await ctx.send('Your input must be a positive integer.')
