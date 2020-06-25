@@ -167,3 +167,35 @@ class MiscCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
+
+    @commands.command()
+    async def opgg(self, ctx, *, summoner):
+
+    msgn = str(summoner)
+
+    op_gg = msgn.split()        
+
+    if len(op_gg) > 1:
+        username = msgn.replace(' ', '+')
+    
+    elif len(op_gg) == 1:
+        username = msgn
+
+    else:
+        pass
+
+    url = f'https://na.op.gg/summoner/userName={username}'
+
+    try:
+        source = requests.get(url).text
+        soup = bSoup(source, 'lxml')
+        meow = soup.find('h2', class_='Title').text
+    except:
+        meow = 'nothing'
+
+    if meow == 'This summoner is not registered at OP.GG. Please check spelling.':
+        await ctx.send('Please enter a valid summoner name')
+    else:
+        message = await ctx.send(url)
+        await message.add_reaction('\N{White Heavy Check Mark}')
+        await message.add_reaction('\N{Cross Mark}')
