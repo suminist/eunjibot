@@ -6,3 +6,4 @@ pylast
 python-dotenv
 pymongo
 dnspython
+igramscraper

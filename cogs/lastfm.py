@@ -109,19 +109,19 @@ class LastFmCog(commands.Cog):
 # database functions below
 
 def _db_set_username(id, username):
-    user = users.find_one({"id": f"{id}"})
+    user = users.find_one({"_id": str(id)})
 
     if user == None:
-        newvalues = { "id" : f"{id}", "lfUsername": username}
+        newvalues = { "_id" : str(id), "lfUsername": username}
         users.insert_one(newvalues)
     else:
-        myquery = { "id": f"{id}" }
+        myquery = { "_id": f"{id}" }
         newvalues = { "$set": { "lfUsername": username } }
         users.update_one(myquery, newvalues)
 
 def _db_get_username(id):
     try:
-        username = users.find_one({"id": f"{id}"})['lfUsername']
+        username = users.find_one({"_id": f"{id}"})['lfUsername']
         return username
     except Exception as e:
         print(e)
