@@ -23,7 +23,10 @@ class GuildSettingsCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         guild_id = message.guild.id
-        prefix = settings.get_guild_settings(str(guild_id))['prefix']
+        try:
+            prefix = settings.get_guild_settings(str(guild_id))['prefix']
+        except:
+            prefix = '~'
 
         if message.content.startswith(prefix):
             message.content = message.content.replace(prefix, '~', 1)
