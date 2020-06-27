@@ -51,7 +51,8 @@ class InstagramCog(commands.Cog):
 
         try:
             user = igramscraper.get_account((args[0]))
-        except:
+        except Exception as e:
+            print(e)
             await ctx.send('Invalid instagram username.')
             return
 
