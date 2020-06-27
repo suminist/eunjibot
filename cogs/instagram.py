@@ -34,7 +34,7 @@ class InstagramCog(commands.Cog):
         elif args[0] in ['delete']:
             await self._delete_feed(ctx, args[1:])
         elif args[0] in ['list']:
-            await self._list_feeds(ctx, args[1:])
+            await self._list_feeds(ctx)
         else:
             await ctx.send('Wrong arguments.')
 
@@ -62,21 +62,43 @@ class InstagramCog(commands.Cog):
 
         await ctx.send(f'{ctx.guild.me.mention} will now update new posts of `{user.username}` to {channel.mention}.')
         
-    async def _delete_feed(self, ctx, *args):
-        return
+    async def _delete_feed(self, ctx, args):
+        if len(args) == 0:
+            await ctx.send('Please include the feed numbers to delete `instagram delete <feed number> <feed number> ...`\nYou can use `instagram list` to list the feeds.')
+            return
 
-    async def _list_feeds(self, ctx, *args):
+        users = _db_get_ig_users()
+        guild_channels = ctx.guild.channels
+        guild_channels_ids = [str(guild_channels[x].id) for x in range(0,len(guild_channels))]
+
+        response = f'Stopped following:\n'
+
+        feed_counter = 0
+        for user in users:
+            for feed_channel_id in user['channels']:
+                if feed_channel_id in guild_channels_ids:
+                    feed_counter += 1
+                    if str(feed_counter) in args:
+                        channel = guild_channels[guild_channels_ids.index(feed_channel_id)]
+                        _db_delete_feed(user['_id'], channel.id)
+                        response = response + f'`{feed_counter}` Stopped following `{user["username"]}` in {channel.mention}\n'
+
+        await ctx.send(response)
+
+    async def _list_feeds(self, ctx):
         users = _db_get_ig_users()
         guild_channels = ctx.guild.channels
         guild_channels_ids = [str(guild_channels[x].id) for x in range(0,len(guild_channels))]
 
         response = f'Followed accounts for `{ctx.guild.name}`:\n'
 
+        feed_counter = 0
         for user in users:
             for feed_channel_id in user['channels']:
                 if feed_channel_id in guild_channels_ids:
+                    feed_counter += 1
                     channel = guild_channels[guild_channels_ids.index(feed_channel_id)]
-                    response = response + f' - Following `{user["username"]}` in {channel.mention}\n'
+                    response = response + f'`{feed_counter}` Following `{user["username"]}` in {channel.mention}\n'
 
         await ctx.send(response)
 
@@ -92,9 +114,12 @@ class InstagramCog(commands.Cog):
 
         try:
             for ig_user in _db_get_ig_users():
-                user = igramscraper.get_account_by_id(ig_user['_id'])
-                medias = igramscraper.get_medias_by_user_id(ig_user['_id'])
-                latest_post_time = ig_user['latest_post_time']
+                try:
+                    user = igramscraper.get_account_by_id(ig_user['_id'])
+                    medias = igramscraper.get_medias_by_user_id(ig_user['_id'])
+                    latest_post_time = ig_user['latest_post_time']
+                except Exception as e:
+                    print(e)
 
                 for media in reversed(medias):
                     if int(latest_post_time) >= int(media.created_time):
@@ -149,6 +174,28 @@ def _db_add_feed(user, channel_id):
     channels_array.append(str(channel_id))
     print(channels_array)
 
+    newvalues = { "$set": { "channels" : channels_array } }
+    feeds_ig.update_one(myquery, newvalues)
+    
+    return
+
+def _db_delete_feed(user_id, channel_id):
+    myquery = { "_id": str(user_id) }
+    user_document = feeds_ig.find_one(myquery)
+
+    print(channel_id)
+    print(user_document)
+    if user_document == None:
+        return
+
+    channels_array = user_document['channels']
+
+    channels_array.remove(str(channel_id))
+
+    if len(channels_array) == 0:
+        feeds_ig.delete_one(myquery)
+        return
+    
     newvalues = { "$set": { "channels" : channels_array } }
     feeds_ig.update_one(myquery, newvalues)
     
