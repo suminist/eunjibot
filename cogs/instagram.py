@@ -14,7 +14,10 @@ class InstagramCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._instagram_scraper.start()    
-        
+        self._logged_in = False
+        self._login()
+
+    def _login(self):
         try:
             igramscraper.with_credentials(IG_USERNAME, IG_PASSWORD, './')
             igramscraper.login()
@@ -50,6 +53,7 @@ class InstagramCog(commands.Cog):
             return
 
         try:
+            self._login()
             user = igramscraper.get_account((args[0]))
         except Exception as e:
             print(e)
@@ -107,6 +111,7 @@ class InstagramCog(commands.Cog):
         if self.bot.is_ready() == False:
             return
 
+        self._login()
         if self._logged_in == False:
             return
 
