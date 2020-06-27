@@ -9,3 +9,6 @@ LF_API_KEY = os.getenv('LF_API_KEY')
 LF_API_SECRET = os.getenv('LF_API_SECRET')
 
 OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
+
+IG_USERNAME = os.getenv('IG_USERNAME')
+IG_PASSWORD = os.getenv('IG_PASSWORD')

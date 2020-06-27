@@ -1,10 +1,11 @@
 from datetime import datetime
 import discord
 from discord.ext import commands, tasks
+from secret_keys import IG_USERNAME, IG_PASSWORD, MONGODB_CONNECTION
+
 from igramscraper.instagram import Instagram
 igramscraper = Instagram()
 
-from secret_keys import MONGODB_CONNECTION
 import pymongo
 myclient = pymongo.MongoClient(MONGODB_CONNECTION)
 feeds_ig = myclient.overall.feeds_ig
@@ -12,7 +13,15 @@ feeds_ig = myclient.overall.feeds_ig
 class InstagramCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._instagram_scraper.start()
+        self._instagram_scraper.start()    
+        
+        try:
+            igramscraper.with_credentials(IG_USERNAME, IG_PASSWORD, './')
+            igramscraper.login()
+            self._logged_in = True
+        except Exception as e:
+            print(e)
+            self._logged_in = False
 
     @commands.command(aliases=['ig'])
     async def instagram(self, ctx, *args):
@@ -76,7 +85,10 @@ class InstagramCog(commands.Cog):
         if self.bot.is_ready() == False:
             return
 
-        print("Scraping Instagram")
+        if self._logged_in == False:
+            return
+
+        print("IG task: Starting")
 
         try:
             for ig_user in _db_get_ig_users():
@@ -99,10 +111,10 @@ class InstagramCog(commands.Cog):
 
                     _db_update_latest_post(user, medias[0].created_time)  
                   
-                print("Done Scraping Instagram")
+                print(f"Done {user.username}")
 
         except Exception as e:
-            print('INSTAGRAM SCRAPER ERROR')
+            print('IG task ERROR')
             print(e)
 
 def _db_get_ig_users():
