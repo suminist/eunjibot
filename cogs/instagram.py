@@ -111,20 +111,18 @@ class InstagramCog(commands.Cog):
         if self.bot.is_ready() == False:
             return
 
-        self._login()
-        if self._logged_in == False:
-            return
-
         print("IG task: Starting")
 
         try:
             for ig_user in _db_get_ig_users():
                 try:
+                    self._login()
                     user = igramscraper.get_account_by_id(ig_user['_id'])
                     medias = igramscraper.get_medias_by_user_id(ig_user['_id'])
                     latest_post_time = ig_user['latest_post_time']
                 except Exception as e:
                     print(e)
+                    continue
 
                 for media in reversed(medias):
                     if int(latest_post_time) >= int(media.created_time):
