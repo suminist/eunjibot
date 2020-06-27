@@ -23,6 +23,7 @@ class InstagramCog(commands.Cog):
             igramscraper.login()
             self._logged_in = True
         except Exception as e:
+            print('IG login error')
             print(e)
             self._logged_in = False
 
