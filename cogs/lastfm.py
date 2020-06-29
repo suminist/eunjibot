@@ -226,8 +226,10 @@ class LastFmCog(commands.Cog):
             await reaction.message.delete()
             return
 
-        if new_page == 0 or new_page > max_page:
-            return
+        if new_page == 0:
+            new_page = max_page
+        elif new_page > max_page:
+            new_page = 1
 
         username = author_field.split(' ')[0][:-2]
 

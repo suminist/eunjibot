@@ -29,7 +29,7 @@ class InstagramCog(commands.Cog):
         except Exception as e:
             print('IG login error')
             print(e)
-            self._cooldown = 10
+            self._cooldown = 20
             self._logged_in = False
 
     @commands.command(aliases=['ig'])
@@ -123,7 +123,7 @@ class InstagramCog(commands.Cog):
         if self._cooldown > 0:
             self._cooldown -= 1
             return
-        if self._consecutive_scrapes > 8:
+        if self._consecutive_scrapes > 7:
             self._consecutive_scrapes = 0
             self._cooldown = 10
 
