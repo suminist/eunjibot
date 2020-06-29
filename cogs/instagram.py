@@ -13,6 +13,10 @@ feeds_ig = myclient.overall.feeds_ig
 class InstagramCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self._index = 0
+        self._consecutive_scrapes = 0
+        self._cooldown = 0
+
         self._instagram_scraper.start()    
         self._logged_in = False
         self._login()
@@ -25,10 +29,15 @@ class InstagramCog(commands.Cog):
         except Exception as e:
             print('IG login error')
             print(e)
+            self._cooldown = 10
             self._logged_in = False
 
     @commands.command(aliases=['ig'])
     async def instagram(self, ctx, *args):
+        if ctx.author.guild_permissions.administrator == False:
+            await ctx.send('You must be an administrator to use `instagram` commands.')
+            return
+
         if len(args) == 0:
             await ctx.send('Wrong arguments.')
             return
@@ -54,7 +63,6 @@ class InstagramCog(commands.Cog):
             return
 
         try:
-            self._login()
             user = igramscraper.get_account((args[0]))
         except Exception as e:
             print(e)
@@ -107,17 +115,31 @@ class InstagramCog(commands.Cog):
 
         await ctx.send(response)
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(seconds=60)
     async def _instagram_scraper(self):
         if self.bot.is_ready() == False:
             return
 
+        if self._cooldown > 0:
+            self._cooldown -= 1
+            return
+        if self._consecutive_scrapes > 8:
+            self._consecutive_scrapes = 0
+            self._cooldown = 10
+
         print("IG task: Starting")
 
         try:
-            for ig_user in _db_get_ig_users():
+            ig_users = _db_get_ig_users()
+            if self._index >= feeds_ig.count():
+                self._index = 0
+            
+            for ig_user in ig_users[self._index:self._index+1]:
                 try:
                     self._login()
+                    if self._logged_in == False:
+                        return
+
                     user = igramscraper.get_account_by_id(ig_user['_id'])
                     medias = igramscraper.get_medias_by_user_id(ig_user['_id'])
                     latest_post_time = ig_user['latest_post_time']
@@ -142,6 +164,9 @@ class InstagramCog(commands.Cog):
                   
                 print(f"Done {user.username}")
 
+            self._index += 1
+            self._consecutive_scrapes += 1
+
         except Exception as e:
             print('IG task ERROR')
             print(e)
@@ -164,7 +189,7 @@ def _db_add_feed(user, channel_id):
         new_user_content = {
             '_id' : str(user.identifier),
             'username' : str(user.username),
-            'latest_post_time' : int(datetime.now().timestamp()),
+            'latest_post_time' : int(datetime.utcnow().timestamp()),
             'channels' : [str(channel_id)]
         }
         feeds_ig.insert_one(new_user_content)
