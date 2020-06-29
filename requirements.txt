@@ -2,7 +2,6 @@ beautifulsoup4
 discord
 requests
 lxml
-pylast
 python-dotenv
 pymongo
 dnspython
