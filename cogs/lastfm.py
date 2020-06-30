@@ -146,6 +146,8 @@ class LastFmCog(commands.Cog):
                 period = '12month'
             elif args[0] in ['alltime']:
                 period = 'overall'
+            else:
+                period = 'overall'
         else:
             period = 'overall'
 
