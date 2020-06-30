@@ -6,15 +6,9 @@ class ManagementCog(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.bot_has_guild_permissions(ban_members=True)
+    @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, *args):
-        if ctx.author.guild_permissions.ban_members == False:
-            await ctx.send('You have no permissions to ban members.')
-            return
-        
-        if ctx.guild.me.guild_permissions.ban_members == False:
-            await ctx.send('The bot has no permissions to ban members.')
-            return
-
         if len(args) == 0:
             await ctx.send('Please enter the user to ban.')
             return
@@ -38,15 +32,9 @@ class ManagementCog(commands.Cog):
             return
 
     @commands.command()
+    @commands.bot_has_guild_permissions(kick_members=True)
+    @commands.has_guild_permissions(kick_members=True)
     async def kick(self, ctx, *args):
-        if ctx.author.guild_permissions.kick_members == False:
-            await ctx.send('You have no permissions to kick members.')
-            return
-        
-        if ctx.guild.me.guild_permissions.kick_members == False:
-            await ctx.send('The bot has no permissions to kick members.')
-            return
-
         if len(args) == 0:
             await ctx.send('Please enter the user to kick.')
             return
@@ -69,15 +57,9 @@ class ManagementCog(commands.Cog):
             return
 
     @commands.command()
+    @commands.bot_has_guild_permissions(manage_roles=True)
+    @commands.has_guild_permissions(manage_roles=True)
     async def mute(self, ctx, *args):
-        if ctx.author.guild_permissions.manage_roles == False:
-            await ctx.send('You have no permissions to manage roles.')
-            return
-        
-        if ctx.guild.me.guild_permissions.manage_roles == False:
-            await ctx.send('The bot has no permissions to manage roles.')
-            return
-
         if len(args) == 0:
             await ctx.send('Please enter the user to mute.')
             return
@@ -122,6 +104,7 @@ class ManagementCog(commands.Cog):
             return
 
     @commands.command()
+    @commands.has_guild_permissions(administrator=True)
     async def purge(self, ctx, *args):
         if ctx.author.guild_permissions.administrator == False:
             await ctx.send('You must be an administrator to purge.')
@@ -149,3 +132,7 @@ class ManagementCog(commands.Cog):
         except Exception as e:
             await ctx.send(e)
             return
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        await ctx.send(error)
