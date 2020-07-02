@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from urllib.parse import quote
 import discord
 from discord.ext import commands
 import requests
@@ -76,26 +77,12 @@ class LastFmCog(commands.Cog):
             return
         
         if len(args) > 0:
-            if args[0] in ['7-days', 'week']:
-                period = '7day'
-            elif args[0] in ['1-month', 'month']:
-                period = '1month'
-            elif args[0] in ['3-month', 'quarter']:
-                period = '3month'
-            elif args[0] in ['6-month', 'half-year']:
-                period = '6month'
-            elif args[0] in ['12-month','year']:
-                period = '12month'
-            elif args[0] in ['alltime']:
-                period = 'overall'
+            period = _lf_period(args[0])
         else:
             period = 'overall'
 
         embed = _embed_ta(username=username, page=1, period=period)
         message = await ctx.send(embed=embed)
-        await message.add_reaction('⬅')
-        await message.add_reaction('➡')
-        await message.add_reaction('❌')
 
     async def _top_tracks(self, ctx, args, user):
         username = _db_get_username(user.id)
@@ -105,26 +92,13 @@ class LastFmCog(commands.Cog):
             return
         
         if len(args) > 0:
-            if args[0] in ['7-days', 'week']:
-                period = '7day'
-            elif args[0] in ['1-month', 'month']:
-                period = '1month'
-            elif args[0] in ['3-month', 'quarter']:
-                period = '3month'
-            elif args[0] in ['6-month', 'half-year']:
-                period = '6month'
-            elif args[0] in ['12-month','year']:
-                period = '12month'
-            elif args[0] in ['alltime']:
-                period = 'overall'
+            period = _lf_period(args[0])
         else:
             period = 'overall'
 
         embed = _embed_tt(username=username, page=1, period=period)
         message = await ctx.send(embed=embed)
-        await message.add_reaction('⬅')
-        await message.add_reaction('➡')
-        await message.add_reaction('❌')
+        await _add_lf_emojis(message)
 
     async def _top_albums(self, ctx, args, user):
         username = _db_get_username(user.id)
@@ -134,28 +108,13 @@ class LastFmCog(commands.Cog):
             return
         
         if len(args) > 0:
-            if args[0] in ['7-days', 'week']:
-                period = '7day'
-            elif args[0] in ['1-month', 'month']:
-                period = '1month'
-            elif args[0] in ['3-month', 'quarter']:
-                period = '3month'
-            elif args[0] in ['6-month', 'half-year']:
-                period = '6month'
-            elif args[0] in ['12-month','year']:
-                period = '12month'
-            elif args[0] in ['alltime']:
-                period = 'overall'
-            else:
-                period = 'overall'
+            period = _lf_period(args[0])
         else:
             period = 'overall'
 
         embed = _embed_talb(username=username, page=1, period=period)
         message = await ctx.send(embed=embed)
-        await message.add_reaction('⬅')
-        await message.add_reaction('➡')
-        await message.add_reaction('❌')
+        await _add_lf_emojis(message)
 
     async def _recent_tracks(self, ctx, args, user):
         username = _db_get_username(user.id)
@@ -166,9 +125,7 @@ class LastFmCog(commands.Cog):
         
         embed = _embed_recent(username=username, page=1)
         message = await ctx.send(embed=embed)
-        await message.add_reaction('⬅')
-        await message.add_reaction('➡')
-        await message.add_reaction('❌')
+        await _add_lf_emojis(message)
 
     async def _now_playing(self, ctx, args, user):
         username = _db_get_username(user.id)
@@ -255,7 +212,27 @@ class LastFmCog(commands.Cog):
             await reaction.message.edit(embed=embed)
             return
 
-# database functions below
+async def _add_lf_emojis(message):
+    await message.add_reaction('⬅')
+    await message.add_reaction('➡')
+    await message.add_reaction('❌')
+
+def _lf_period(argument):
+    if argument in ['7-days', 'week']:
+        period = '7day'
+    elif argument in ['1-month', 'month']:
+        period = '1month'
+    elif argument in ['3-month', 'quarter']:
+        period = '3month'
+    elif argument in ['6-month', 'half-year']:
+        period = '6month'
+    elif argument in ['12-month','year']:
+        period = '12month'
+    elif argument in ['alltime']:
+        period = 'overall'
+    else:
+        period = 'overall'
+    return period
 
 def _db_set_username(id, username):
     user = users.find_one({"_id": str(id)})
@@ -284,7 +261,7 @@ def _embed_ta(username, period, page):
 
     content = ''
     for artist in data['topartists']['artist']:
-        content += f"`{artist['@attr']['rank']}` [{artist['name']}]({artist['url']}) ({artist['playcount']} plays)\n"
+        content += f"`{artist['@attr']['rank']}` [{artist['name']}]({quote(artist['url']).replace('%3A',':')}) ({artist['playcount']} plays)\n"
 
     embed = discord.Embed(
         title='', 
@@ -309,8 +286,8 @@ def _embed_tt(username, period, page):
 
     content = ''
     for track in data['toptracks']['track']:
-        content += f"`{track['@attr']['rank']}` [{track['name']}]({track['url']}) "
-        content += f"by [{track['artist']['name']}]({track['artist']['url']}) "
+        content += f"`{track['@attr']['rank']}` [{track['name']}]({quote(track['url']).replace('%3A',':')}) "
+        content += f"by [{track['artist']['name']}]({quote(track['artist']['url']).replace('%3A',':')}) "
         content += f"({track['playcount']} plays)\n"
 
     embed = discord.Embed(
@@ -336,8 +313,8 @@ def _embed_talb(username, period, page):
 
     content = ''
     for album in data['topalbums']['album']:
-        content += f"`{album['@attr']['rank']}` [{album['name']}]({album['url']}) "
-        content += f"by [{album['artist']['name']}]({album['artist']['url']}) "
+        content += f"`{album['@attr']['rank']}` [{album['name']}]({quote(album['url']).replace('%3A',':')}) "
+        content += f"by [{album['artist']['name']}]({quote(album['artist']['url']).replace('%3A',':')}) "
         content += f"({album['playcount']} plays)\n"
 
     embed = discord.Embed(
@@ -365,7 +342,7 @@ def _embed_recent(username, page):
     time_now = datetime.utcnow()
     for track in data['recenttracks']['track']:
         content += '`*` '
-        content += f"[{track['name']} by {track['artist']['#text']} ]({track['url']}) "
+        content += f"[{track['name']} by {track['artist']['#text']} ]({quote(track['url']).replace('%3A',':')}) "
 
         if '@attr' in track.keys():
             content += f"- *Now Playing*\n"
@@ -432,12 +409,12 @@ def _embed_np(username):
 
     for key, track in enumerate(data['recenttracks']['track'][:2]):
         if key == 0:
-            content += f"[{track['name']} by {track['artist']['#text']}]({track['url']})\n"
+            content += f"[{track['name']} by {track['artist']['#text']}]({quote(track['url']).replace('%3A',':')})\n"
             content += f"**Album**\n"
             content += f"{track['album']['#text']}\n\n"
         else:
             content += f"**Listened to before**\n"
-            content += f"[{track['name']} by {track['artist']['#text']}]({track['url']})"
+            content += f"[{track['name']} by {track['artist']['#text']}]({quote(track['url']).replace('%3A',':')})"
 
     embed = discord.Embed(
         title='', 
