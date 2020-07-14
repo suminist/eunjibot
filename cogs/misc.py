@@ -6,6 +6,15 @@ from itertools import cycle
 import json
 from bs4 import BeautifulSoup as bSoup
 import requests
+import time
+import operator 
+from functools import reduce
+from datetime import datetime, date
+
+from secret_keys import MONGODB_CONNECTION
+
+import pymongo
+cluster = pymongo.MongoClient(MONGODB_CONNECTION)
 
 class MiscCog(commands.Cog):
     def __init__(self, bot):
@@ -199,3 +208,60 @@ class MiscCog(commands.Cog):
             message = await ctx.send(url)
             await message.add_reaction('\N{White Heavy Check Mark}')
             await message.add_reaction('\N{Cross Mark}')
+
+    @commands.command()
+    async def krupdate(self, ctx):
+        db = cluster['minjubot']
+        krbot = db['hyewonfragrant']
+
+        url = 'https://www.koreanclass101.com/korean-phrases/'
+        headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
+        source = requests.get(url, headers=headers).text
+        soup = bSoup(source, 'lxml')
+
+        wode = soup.find('div', class_='r101-wotd-widget__english').text
+
+        wtd = []
+        ix = krbot.find({'index':'qfind'})
+
+        for item in ix:
+            wtd.append(item['krword'])
+        twod = ''.join(wtd)
+
+        if twod == wode:
+            await(await ctx.send("Already updated")).delete(delay=3)
+        else:
+            today = date.today()
+            await ctx.send(f"```css\n{today} - Korean words of the day with examples```")
+            wodxa = soup.find_all('div', class_='r101-wotd-widget__word')
+            wodexa = soup.find_all('div', class_='r101-wotd-widget__english')
+            ewords = []
+            for eng in wodexa:
+                ewords.append(eng.get_text())
+            ewords = ["||" + item + "||" for item in ewords]
+            kwords = []
+            for kor in wodxa:
+                kwords.append(kor.get_text())
+
+            xlst = list(reduce(operator.add, zip(ewords, kwords)))
+
+            carrot = ''
+            for xls in range(len(xlst)):
+                if xls % 2 == 0:
+                    nls = xls - 2
+                    blist = ' - '.join(xlst[nls:xls])
+                    if blist == '':
+                        pass
+                    else:
+                        carrot += f'{blist}\n'
+            
+            await ctx.send(carrot)
+
+            if twod == '':
+                newvalues = { 'index':'qfind', 'krword':wode}
+                krbot.insert_one(newvalues)
+            else:
+                query = {'index':'qfind'}
+                krbot.update_one(query, {'$set':{'krword':wode}})
+
+        await ctx.message.delete()
