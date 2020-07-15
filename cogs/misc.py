@@ -153,7 +153,11 @@ class MiscCog(commands.Cog):
             await message.channel.send('<:eunjiface:707716555538038875>')
 
         elif 'hug me' in msg_n:
-            await message.channel.send(f'*hugs {splt}*')
+            if message.author.id == 382915421071736852:
+                await message.channel.send(f'*kisses {splt}*')
+            else:
+                await message.channel.send(f'*hugs {splt}*')
+                
             await message.channel.send('<:pandahug:707726416065593355>')
 
         elif 'thanks eunji' in msg_n:
