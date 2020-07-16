@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import os
 import random
 from itertools import cycle
@@ -9,10 +9,7 @@ import requests
 import time
 import operator 
 from functools import reduce
-from datetime import datetime, date, timedelta
-import pytz
-import traceback
-import asyncio
+from datetime import datetime, date
 
 from secret_keys import MONGODB_CONNECTION
 
@@ -22,7 +19,6 @@ cluster = pymongo.MongoClient(MONGODB_CONNECTION)
 class MiscCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.krupdate_loop.start()
 
     @commands.command()
     async def goodnight(self, ctx):
@@ -217,75 +213,6 @@ class MiscCog(commands.Cog):
             await message.add_reaction('\N{White Heavy Check Mark}')
             await message.add_reaction('\N{Cross Mark}')
 
-    @tasks.loop(seconds=1)
-    async def krupdate_loop(self):
-        try:
-            print("start kr loop")
-            await pause_until(self._kr_next_update_dt)
-
-            db = cluster['minjubot']
-            krbot = db['hyewonfragrant']
-            
-            channel = self.bot.get_channel(723401657148244009)
-
-            url = 'https://www.koreanclass101.com/korean-phrases/'
-            headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
-            source = requests.get(url, headers=headers).text
-            soup = bSoup(source, 'lxml')
-
-            wode = soup.find('div', class_='r101-wotd-widget__english').text
-
-            wtd = []
-            ix = krbot.find({'index':'qfind'})
-
-            for item in ix:
-                wtd.append(item['krword'])
-            twod = ''.join(wtd)
-
-            today = date.today()
-            await channel.send(f"```css\n{today} - Korean words of the day with examples```")
-            wodxa = soup.find_all('div', class_='r101-wotd-widget__word')
-            wodexa = soup.find_all('div', class_='r101-wotd-widget__english')
-            ewords = []
-            for eng in wodexa:
-                ewords.append(eng.get_text())
-            ewords = ["||" + item + "||" for item in ewords]
-            kwords = []
-            for kor in wodxa:
-                kwords.append(kor.get_text())
-
-            xlst = list(reduce(operator.add, zip(ewords, kwords)))
-
-            carrot = ''
-            for xls in range(len(xlst)):
-                if xls % 2 == 0:
-                    nls = xls - 2
-                    blist = ' - '.join(xlst[nls:xls])
-                    if blist == '':
-                        pass
-                    else:
-                        carrot += f'{blist}\n'
-            
-            await channel.send(carrot)
-
-            if twod == '':
-                newvalues = { 'index':'qfind', 'krword':wode}
-                krbot.insert_one(newvalues)
-            else:
-                query = {'index':'qfind'}
-                krbot.update_one(query, {'$set':{'krword':wode}})
-
-            while self._kr_next_update_dt < datetime.utcnow().replace(tzinfo=pytz.utc):
-                self._kr_next_update_dt += timedelta(days=1)
-        
-        except Exception as e:
-            traceback.print_exc()
-
-    @krupdate_loop.before_loop
-    async def before_printer(self):
-        await self.bot.wait_until_ready()
-        self._kr_next_update_dt = datetime(2020, 7, 16, 0, 30, 0, 0, pytz.timezone("Asia/Seoul"))
-
     @commands.command()
     async def krupdate(self, ctx):
         db = cluster['minjubot']
@@ -342,21 +269,3 @@ class MiscCog(commands.Cog):
                 krbot.update_one(query, {'$set':{'krword':wode}})
 
         await ctx.message.delete()
-
-
-async def pause_until(dt):
-
-    end = dt.timestamp()
-    # Now we wait
-    while True:
-        now = time.time()
-        diff = end - now
-
-        #
-        # Time is up!
-        #
-        if diff <= 0:
-            break
-        else:
-            # 'logarithmic' sleeping to minimize loop iterations
-            await asyncio.sleep(diff / 2)
