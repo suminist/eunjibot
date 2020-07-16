@@ -6,3 +6,4 @@ python-dotenv
 pymongo
 dnspython
 igramscraper
+pause
