@@ -284,7 +284,7 @@ class MiscCog(commands.Cog):
     @krupdate_loop.before_loop
     async def before_printer(self):
         await self.bot.wait_until_ready()
-        self._kr_next_update_dt = datetime(2020, 7, 16, 0, 30, 0, 0, pytz.timezone("Asia/Seoul"))
+        self._kr_next_update_dt = datetime(2020, 7, 17, 15, 3, 0, 0, pytz.utc)
 
     @commands.command()
     async def krupdate(self, ctx):
@@ -349,7 +349,7 @@ async def pause_until(dt):
     end = dt.timestamp()
     # Now we wait
     while True:
-        now = time.time()
+        now = datetime.utcnow().replace(tzinfo=pytz.utc).timestamp()
         diff = end - now
 
         #
