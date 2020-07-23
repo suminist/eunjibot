@@ -285,6 +285,9 @@ class MiscCog(commands.Cog):
     async def before_printer(self):
         await self.bot.wait_until_ready()
         self._kr_next_update_dt = datetime(2020, 7, 17, 15, 3, 0, 0, pytz.utc)
+        
+        while self._kr_next_update_dt < datetime.utcnow().replace(tzinfo=pytz.utc):
+            self._kr_next_update_dt += timedelta(days=1)
 
     @commands.command()
     async def krupdate(self, ctx):
