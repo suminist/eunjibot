@@ -9,6 +9,7 @@ class GuildSettingsCog(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     async def setprefix(self, ctx, *args):
         if len(args) == 0:
             await ctx.send('Please enter the new prefix.')
