@@ -23,6 +23,7 @@ client.add_cog(ManagementCog(client))
 client.add_cog(LastFmCog(client))
 client.add_cog(MiscCog(client))
 client.add_cog(WeatherCog(client))
+client.remove_command('help')
 #client.add_cog(InstagramCog(client))
 
 client.add_cog(GuildSettingsCog(client))
