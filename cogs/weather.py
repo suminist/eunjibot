@@ -10,6 +10,7 @@ class WeatherCog(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     async def weather(self, ctx, *, msg):
 
         sg = str(msg)
