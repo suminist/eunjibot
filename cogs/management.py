@@ -113,7 +113,7 @@ class ManagementCog(commands.Cog):
         if ctx.author.guild_permissions.administrator == False:
             await ctx.send('You must be an administrator to purge.')
             return
-  
+
         if len(args) == 0:
             await ctx.send('Please enter the number of messages to purge.')
             return
