@@ -10,7 +10,7 @@ class InfoCog(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def botinfo(self, ctx):
-        response_text = "This bot is in the following servers:\n"
+        response_text = f"This bot is in {len(bot.guilds)} servers:\n"
         for guild in self.bot.guilds:
             response_text += f"`-` {guild.name}\n"
 
