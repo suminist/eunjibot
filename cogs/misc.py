@@ -25,6 +25,7 @@ class MiscCog(commands.Cog):
         self.krupdate_loop.start()
 
     @commands.command()
+    @commands.guild_only()
     async def goodnight(self, ctx):
 
         iuwu = [
@@ -34,6 +35,7 @@ class MiscCog(commands.Cog):
         await ctx.send(random.choice(iuwu))
 
     @commands.command()
+    @commands.guild_only()
     async def whatslunch(self, ctx):
 
         lunch = [
@@ -46,6 +48,7 @@ class MiscCog(commands.Cog):
         await ctx.send(random.choice(lunch))
     
     @commands.command()
+    @commands.guild_only()
     async def apink(self, ctx, *, msg):
 
         members= ['eunji', 'bomi', 'hayoung', 'naeun', 'namjoo', 'chorong']
@@ -76,6 +79,7 @@ class MiscCog(commands.Cog):
                 break
 
     @commands.command()
+    @commands.guild_only()
     async def izone(self, ctx, *, msg):
 
         izone = {
@@ -124,6 +128,7 @@ class MiscCog(commands.Cog):
             await ctx.send(embed=embed_kp)
 
     @commands.command()
+    @commands.guild_only()
     async def helpme(self, ctx):
         embed = discord.Embed(
             title = 'List of Commands',
@@ -186,6 +191,7 @@ class MiscCog(commands.Cog):
         print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
 
     @commands.command()
+    @commands.guild_only()
     async def opgg(self, ctx, *, summoner):
 
         msgn = str(summoner)
@@ -290,6 +296,7 @@ class MiscCog(commands.Cog):
             self._kr_next_update_dt += timedelta(days=1)
 
     @commands.command()
+    @commands.guild_only()
     async def krupdate(self, ctx):
         db = cluster['minjubot']
         krbot = db['hyewonfragrant']

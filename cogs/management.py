@@ -6,6 +6,7 @@ class ManagementCog(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     @commands.bot_has_guild_permissions(ban_members=True)
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, *args):
@@ -18,7 +19,7 @@ class ManagementCog(commands.Cog):
         except Exception as e:
             await ctx.send(e)
             return
-        
+
         if member_to_ban.top_role.position >= ctx.author.top_role.position:
             await ctx.send('You cannot ban a member who is not lower than you.')
             return
@@ -32,6 +33,7 @@ class ManagementCog(commands.Cog):
             return
 
     @commands.command()
+    @commands.guild_only()
     @commands.bot_has_guild_permissions(kick_members=True)
     @commands.has_guild_permissions(kick_members=True)
     async def kick(self, ctx, *args):
@@ -57,6 +59,7 @@ class ManagementCog(commands.Cog):
             return
 
     @commands.command()
+    @commands.guild_only()
     @commands.bot_has_guild_permissions(manage_roles=True)
     @commands.has_guild_permissions(manage_roles=True)
     async def mute(self, ctx, *args):
@@ -104,12 +107,13 @@ class ManagementCog(commands.Cog):
             return
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_guild_permissions(administrator=True)
     async def purge(self, ctx, *args):
         if ctx.author.guild_permissions.administrator == False:
             await ctx.send('You must be an administrator to purge.')
             return
-  
+
         if len(args) == 0:
             await ctx.send('Please enter the number of messages to purge.')
             return
