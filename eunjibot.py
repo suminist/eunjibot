@@ -8,6 +8,7 @@ from cogs.weather import WeatherCog
 from cogs.guild_settings import GuildSettingsCog
 from cogs.instagram import InstagramCog
 from cogs.info import InfoCog
+from cogs.welcome import WelcomeCog
 
 from models.guild_settings import AllGuildSettingsModel
 settings = AllGuildSettingsModel()
@@ -25,6 +26,7 @@ client.add_cog(LastFmCog(client))
 client.add_cog(MiscCog(client))
 client.add_cog(WeatherCog(client))
 client.add_cog(InfoCog(client))
+client.add_cog(WelcomeCog(client))
 client.remove_command('help')
 #client.add_cog(InstagramCog(client))
 

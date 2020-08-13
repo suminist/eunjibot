@@ -4,6 +4,7 @@ requests
 lxml
 python-dotenv
 pymongo
+motor
 dnspython
 igramscraper
 pytz
