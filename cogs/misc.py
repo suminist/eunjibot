@@ -233,7 +233,7 @@ class MiscCog(commands.Cog):
             krbot = db['hyewonfragrant']
             
             channel = self.bot.get_channel(723401657148244009)
-
+            channel2 = self.bot.get_channel(743562872025514075)
             url = 'https://www.koreanclass101.com/korean-phrases/'
             headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
             source = requests.get(url, headers=headers).text
@@ -249,7 +249,7 @@ class MiscCog(commands.Cog):
             twod = ''.join(wtd)
 
             today = date.today()
-            await channel.send(f"```css\n{today} - Korean words of the day with examples```")
+            await channel.send(f"```css\n{today} - Korean word of the day with examples```")
             wodxa = soup.find_all('div', class_='r101-wotd-widget__word')
             wodexa = soup.find_all('div', class_='r101-wotd-widget__english')
             ewords = []
@@ -273,7 +273,7 @@ class MiscCog(commands.Cog):
                         carrot += f'{blist}\n'
             
             await channel.send(carrot)
-
+            await channel2.send(carrot)
             if twod == '':
                 newvalues = { 'index':'qfind', 'krword':wode}
                 krbot.insert_one(newvalues)
