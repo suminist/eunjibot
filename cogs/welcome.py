@@ -28,14 +28,26 @@ class WelcomeCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        channel_id = await guilds.db_get_welcome_channel_id(member.guild.id)
+        #channel_id = await guilds.db_get_welcome_channel_id(member.guild.id)
 
-        if channel_id is None:
-            return
+        #if channel_id is None:
+        #    return
 
-        channel = member.guild.get_channel(channel_id)
-        if channel is None:
-            print(f"Cannot welcome {member} to {member.guild.name} (invalid channel)")
-            return
+        #channel = member.guild.get_channel(channel_id)
+        #if channel is None:
+        #    print(f"Cannot welcome {member} to {member.guild.name} (invalid channel)")
+        #    return
 
-        await channel.send(f"Welcome to {member.guild.name}, {member.mention}!")
+        #await channel.send(f"Welcome to {member.guild.name}, {member.mention}!")
+
+        channel_id = client.get_channel(734209655550509196)
+
+	    embed = discord.Embed(
+	        color=0xFE7DFA
+	    )
+	    embed.add_field(name='New Member Join', value=f"Welcome to {member.guild.name}, {member.mention}. recieve your roles in <#743300092907225168> and read the rules in <#743307491290382416>")
+	    embed.set_thumbnail(url=member.avatar_url)
+	    embed.set_image(url='https://i.imgur.com/Yfaat1t.png')
+	    embed.set_footer(text=f"Member #**{len(member.guild.members)}**")
+
+	    await channel_id.send(embed=embed)
