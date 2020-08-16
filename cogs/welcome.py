@@ -40,7 +40,7 @@ class WelcomeCog(commands.Cog):
 
         #await channel.send(f"Welcome to {member.guild.name}, {member.mention}!")
 
-        channel_id = client.get_channel(734209655550509196)
+        channel_id = self.client.get_channel(734209655550509196)
 
 	    embed = discord.Embed(
 	        color=0xFE7DFA
