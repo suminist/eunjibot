@@ -40,7 +40,7 @@ class WelcomeCog(commands.Cog):
 
         #await channel.send(f"Welcome to {member.guild.name}, {member.mention}!")
 
-        channel_id = self.client.get_channel(734209655550509196)
+        channel = member.guild.get_channel(734209655550509196)
 
         embed = discord.Embed(color=0xFE7DFA)
         embed.add_field(name='New Member Join', value=f"Welcome to {member.guild.name}, {member.mention}. recieve your roles in <#743300092907225168> and read the rules in <#743307491290382416>")
@@ -48,4 +48,4 @@ class WelcomeCog(commands.Cog):
         embed.set_image(url='https://i.imgur.com/Yfaat1t.png')
         embed.set_footer(text=f"Member #**{len(member.guild.members)}**")
 
-        await channel_id.send(embed=embed)
+        await channel.send(embed=embed)
