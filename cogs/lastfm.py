@@ -83,6 +83,7 @@ class LastFmCog(commands.Cog):
 
         embed = _embed_ta(username=username, page=1, period=period)
         message = await ctx.send(embed=embed)
+        await _add_lf_emojis(message)
 
     async def _top_tracks(self, ctx, args, user):
         username = _db_get_username(user.id)
