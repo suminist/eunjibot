@@ -40,12 +40,24 @@ class WelcomeCog(commands.Cog):
 
         #await channel.send(f"Welcome to {member.guild.name}, {member.mention}!")
 
-        channel = member.guild.get_channel(734209655550509196)
+        if(member.guild_id == 661452294822559805):
+            channel = member.guild.get_channel(661825279592759327)
 
-        embed = discord.Embed(color=0xFE7DFA)
-        embed.add_field(name='New Member Join', value=f"Welcome to {member.guild.name}, {member.mention}. recieve your roles in <#743300092907225168> and read the rules in <#743307491290382416>")
-        embed.set_thumbnail(url=member.avatar_url)
-        embed.set_image(url='https://i.imgur.com/Yfaat1t.png')
-        embed.set_footer(text=f"Member #**{len(member.guild.members)}**")
+            embed = discord.Embed(color=0xFE7DFA)
+            embed.add_field(name='New Member Join', value=f"Welcome to {member.guild.name}, {member.mention}. Lee is uwu")
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_image(url='https://i.imgur.com/Yfaat1t.png')
+            embed.set_footer(text=f"Member #**{len(member.guild.members)}**")
 
-        await channel.send(embed=embed)
+            await channel.send(embed=embed)
+        
+        else:
+            channel = member.guild.get_channel(734209655550509196)
+
+            embed = discord.Embed(color=0xFE7DFA)
+            embed.add_field(name='New Member Join', value=f"Welcome to {member.guild.name}, {member.mention}. recieve your roles in <#743300092907225168> and read the rules in <#743307491290382416>")
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_image(url='https://i.imgur.com/Yfaat1t.png')
+            embed.set_footer(text=f"Member #**{len(member.guild.members)}**")
+
+            await channel.send(embed=embed)
