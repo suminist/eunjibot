@@ -40,7 +40,7 @@ class WelcomeCog(commands.Cog):
 
         #await channel.send(f"Welcome to {member.guild.name}, {member.mention}!")
 
-        if(member.guild_id == 661452294822559805):
+        if(member.guild.id == 661452294822559805):
             channel = member.guild.get_channel(661825279592759327)
 
             embed = discord.Embed(color=0xFE7DFA)
