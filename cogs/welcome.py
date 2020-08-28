@@ -46,7 +46,7 @@ class WelcomeCog(commands.Cog):
             embed = discord.Embed(color=0xFE7DFA)
             embed.add_field(name='New Member Join', value=f"Welcome to {member.guild.name}, {member.mention}. Lee is uwu")
             embed.set_thumbnail(url=member.avatar_url)
-            embed.set_image(url='https://i.imgur.com/Yfaat1t.png')
+            embed.set_image(url='https://cdn.discordapp.com/attachments/748678569689088020/748682063892185180/EexCBsuUwAArzoQ.jpg')
             embed.set_footer(text=f"Member #**{len(member.guild.members)}**")
 
             await channel.send(embed=embed)
