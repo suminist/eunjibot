@@ -152,7 +152,8 @@ class MiscCog(commands.Cog):
 
         if 'is high' in msg_n: #easter egg
             await message.channel.send('https://www.youtube.com/watch?v=fpSTrry_5Fo')
-            
+        elif 'the best girl' in msg_n:
+            await message.channel.send("It's me", delete_after=1)
         elif 'i love you eunji' in msg_n:
             await message.channel.send(f'i love you too {splt} :flushed:')
             await message.add_reaction('\N{HEAVY BLACK HEART}') 
