@@ -89,7 +89,7 @@ async def db_get_welcome_image_url(guild_id):
             else:
                 return None
         else:
-            await db_set_welcome_content(guild_id, None)
+            await db_set_welcome_image_url(guild_id, None)
             return None
 
 
