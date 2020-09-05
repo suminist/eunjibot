@@ -143,8 +143,8 @@ class MiscCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        print(f'Message from {message.author.id} in channel {message.channel.id} in server {message.guild.id}')
-        print(message.content)
+        #print(f'Message from {message.author.id} in channel {message.channel.id} in server {message.guild.id}')
+        #print(message.content)
 
         splt = str(message.author.display_name) #nickname
         # tag_id = str(message.author.id)         #discord ID
