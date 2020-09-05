@@ -11,7 +11,6 @@ class AllGuildSettingsModel():
         }
 
     def get_guild_settings(self, id):
-        print(id)
         return guilds.find_one({'_id': f'{id}'})
 
     def set_guild_settings(self, id, **kwargs):
