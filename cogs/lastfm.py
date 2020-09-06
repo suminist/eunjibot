@@ -4,11 +4,8 @@ import discord
 from discord.ext import commands
 import requests
 import json
-from secret_keys import LF_API_KEY, LF_API_SECRET, MONGODB_CONNECTION
-
-import pymongo
-myclient = pymongo.MongoClient(MONGODB_CONNECTION)
-users = myclient.overall.users
+from secret_keys import LF_API_KEY, LF_API_SECRET
+from db import users
 
 import discord
 from discord.ext import commands
@@ -70,7 +67,7 @@ class LastFmCog(commands.Cog):
             await self._now_playing(ctx, args[1:], user)          
 
     async def _top_artists(self, ctx, args, user):
-        username = _db_get_username(user.id)
+        username = await users.db_get_lf_username(user.id)
 
         if username == None:
             await ctx.send('Please register your username with `lf set username`')
@@ -86,7 +83,7 @@ class LastFmCog(commands.Cog):
         await _add_lf_emojis(message)
 
     async def _top_tracks(self, ctx, args, user):
-        username = _db_get_username(user.id)
+        username = await users.db_get_lf_username(user.id)
 
         if username == None:
             await ctx.send('Please register your username with `lf set username`')
@@ -102,12 +99,12 @@ class LastFmCog(commands.Cog):
         await _add_lf_emojis(message)
 
     async def _top_albums(self, ctx, args, user):
-        username = _db_get_username(user.id)
+        username = await users.db_get_lf_username(user.id)
 
         if username == None:
             await ctx.send('Please register your username with `lf set username`')
             return
-        
+
         if len(args) > 0:
             period = _lf_period(args[0])
         else:
@@ -118,9 +115,9 @@ class LastFmCog(commands.Cog):
         await _add_lf_emojis(message)
 
     async def _recent_tracks(self, ctx, args, user):
-        username = _db_get_username(user.id)
+        username = await users.db_get_lf_username(user.id)
 
-        if username == None:
+        if username is None:
             await ctx.send('Please register your username with `lf set username`')
             return
         
@@ -129,9 +126,9 @@ class LastFmCog(commands.Cog):
         await _add_lf_emojis(message)
 
     async def _now_playing(self, ctx, args, user):
-        username = _db_get_username(user.id)
+        username = await users.db_get_lf_username(user.id)
 
-        if username == None:
+        if username is None:
             await ctx.send('Please register your username with `lf set username`')
             return
 
@@ -146,7 +143,7 @@ class LastFmCog(commands.Cog):
         author_id = ctx.message.author.id
         username = args[0]
 
-        _db_set_username(author_id, username)
+        await users.db_set_lf_username(author_id, username)
         await ctx.send(f"Set username to {username}")
 
     @commands.Cog.listener()
@@ -163,7 +160,7 @@ class LastFmCog(commands.Cog):
             return
         if 'last listened' in author_field:
             return
-            
+ 
         if reaction.emoji == '⬅' and reaction.count > 1:
             action = 0
             await reaction.remove(user)
@@ -213,10 +210,12 @@ class LastFmCog(commands.Cog):
             await reaction.message.edit(embed=embed)
             return
 
+
 async def _add_lf_emojis(message):
     await message.add_reaction('⬅')
     await message.add_reaction('➡')
     await message.add_reaction('❌')
+
 
 def _lf_period(argument):
     if argument in ['7-days', 'week']:
@@ -235,24 +234,6 @@ def _lf_period(argument):
         period = 'overall'
     return period
 
-def _db_set_username(id, username):
-    user = users.find_one({"_id": str(id)})
-
-    if user == None:
-        newvalues = { "_id" : str(id), "lfUsername": username}
-        users.insert_one(newvalues)
-    else:
-        myquery = { "_id": str(id) }
-        newvalues = { "$set": { "lfUsername": username } }
-        users.update_one(myquery, newvalues)
-
-def _db_get_username(id):
-    try:
-        username = users.find_one({"_id": f"{id}"})['lfUsername']
-        return username
-    except Exception as e:
-        print(e)
-        return None
 
 def _embed_ta(username, period, page):
     response = requests.get(f'http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user={username}&api_key={LF_API_KEY}&period={period}&limit=10&page={page}&format=json')
@@ -278,6 +259,7 @@ def _embed_ta(username, period, page):
                     icon_url="https://cdn2.iconfinder.com/data/icons/social-icon-3/512/social_style_3_lastfm-512.png")
 
     return embed
+
 
 def _embed_tt(username, period, page):
     response = requests.get(f'http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user={username}&api_key={LF_API_KEY}&period={period}&limit=10&page={page}&format=json')
@@ -306,6 +288,7 @@ def _embed_tt(username, period, page):
 
     return embed
 
+
 def _embed_talb(username, period, page):
     response = requests.get(f'http://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user={username}&api_key={LF_API_KEY}&period={period}&limit=10&page={page}&format=json')
     data = json.loads(response.text)
@@ -332,6 +315,7 @@ def _embed_talb(username, period, page):
                     icon_url="https://cdn2.iconfinder.com/data/icons/social-icon-3/512/social_style_3_lastfm-512.png")
 
     return embed
+
 
 def _embed_recent(username, page):
     response = requests.get(f'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={username}&api_key={LF_API_KEY}&limit=10&page={page}&format=json')
@@ -394,6 +378,7 @@ def _embed_recent(username, page):
                     icon_url="https://cdn2.iconfinder.com/data/icons/social-icon-3/512/social_style_3_lastfm-512.png")
 
     return embed
+
 
 def _embed_np(username):
     response = requests.get(f'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={username}&api_key={LF_API_KEY}&limit=2&page=1&format=json')
