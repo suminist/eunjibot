@@ -10,9 +10,6 @@ from cogs.instagram import InstagramCog
 from cogs.info import InfoCog
 from cogs.welcome import WelcomeCog
 
-from models.guild_settings import AllGuildSettingsModel
-settings = AllGuildSettingsModel()
-
 from secret_keys import DISCORD_BOT_TOKEN
 
 async def blank(*args):
