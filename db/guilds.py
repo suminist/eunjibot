@@ -3,6 +3,30 @@ from db import db
 guilds_collection = db.get_guilds_collection()
 
 
+async def db_set_prefix(guild_id, prefix):
+    guild_document = await guilds_collection.find_one({"_id": str(guild_id)})
+
+    if guild_document is None:
+        await db_create_new_guild(guild_id, prefix=prefix)
+        return
+    else:
+        myquery = {"_id": str(guild_id)}
+        newvalues = guild_document
+        newvalues["prefix"] = str(prefix)
+
+        await guilds_collection.update_one(myquery, {"$set": newvalues})
+        return
+
+
+async def db_get_prefix(guild_id):
+    guild_document = await guilds_collection.find_one({"_id": str(guild_id)})
+    if guild_document is None:
+        return None
+
+    prefix = guild_document["prefix"]
+    return prefix
+
+
 async def db_set_welcome(
             guild_id, *,
             welcome_channel_id=None,
