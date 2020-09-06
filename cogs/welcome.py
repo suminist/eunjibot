@@ -27,24 +27,43 @@ class WelcomeCog(commands.Cog):
             await ctx.send('Invalid text channel.')
             return
 
-        await guilds.db_set_welcome_channel_id(ctx.guild.id, channel.id)
+        await guilds.db_set_welcome(ctx.guild.id, welcome_channel_id=channel.id)
         await ctx.send(f'Welcome channel is set to {channel.mention}.')
 
     @welcome.command()
+    async def title(self, ctx):
+        title = " ".join(ctx.message.content.split(" ")[2:])
+
+        if title == "":
+            await ctx.send("Please include the title")
+            return
+
+        await guilds.db_set_welcome(ctx.guild.id, welcome_title=title)
+
+        welcome_info = await guilds.db_get_welcome(ctx.guild.id)
+
+        embed = generate_embed(
+                ctx.author,
+                welcome_info
+            )
+
+        await ctx.send(embed=embed)
+
+    @welcome.command()
     async def content(self, ctx):
-        print(ctx.message.content)
         content = " ".join(ctx.message.content.split(" ")[2:])
-        print(content)
 
         if content == "":
             await ctx.send("Please include the content")
             return
 
-        await guilds.db_set_welcome_content(ctx.guild.id, content)
-        embed = generateEmbed(
+        await guilds.db_set_welcome(ctx.guild.id, welcome_content=content)
+
+        welcome_info = await guilds.db_get_welcome(ctx.guild.id)
+
+        embed = generate_embed(
                 ctx.author,
-                await guilds.db_get_welcome_content(ctx.guild.id),
-                await guilds.db_get_welcome_image_url(ctx.guild.id)
+                welcome_info
             )
 
         await ctx.send(embed=embed)
@@ -57,61 +76,71 @@ class WelcomeCog(commands.Cog):
             await ctx.send("Please include the image url")
             return
 
-        await guilds.db_set_welcome_image_url(ctx.guild.id, image_url)
-        embed = generateEmbed(
+        await guilds.db_set_welcome(ctx.guild.id, welcome_image_url=image_url)
+
+        welcome_info = await guilds.db_get_welcome(ctx.guild.id)
+
+        embed = generate_embed(
                 ctx.author,
-                await guilds.db_get_welcome_content(ctx.guild.id),
-                await guilds.db_get_welcome_image_url(ctx.guild.id)
+                welcome_info
             )
 
         try:
             await ctx.send(embed=embed)
         except Exception as e:
             print(e)
-            await guilds.db_set_welcome_image_url(ctx.guild.id, None)
+            await guilds.db_set_welcome(ctx.guild.id, welcome_image_url="None")
             await ctx.send("Invalid image URL")
 
     @welcome.command()
     async def preview(self, ctx):
-        embed = generateEmbed(
+        welcome_info = await guilds.db_get_welcome(ctx.guild.id)
+
+        embed = generate_embed(
                 ctx.author,
-                await guilds.db_get_welcome_content(ctx.guild.id),
-                await guilds.db_get_welcome_image_url(ctx.guild.id)
+                welcome_info
             )
 
         await ctx.send(
-            f"Welcome channel in <#{await guilds.db_get_welcome_channel_id(ctx.guild.id)}>",
+            f"Welcome channel in <#{welcome_info['channel_id']}>",
             embed=embed)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        channel_id = await guilds.db_get_welcome_channel_id(member.guild.id)
+        welcome_info = await guilds.db_get_welcome(member.guild.id)
 
-        if channel_id is None:
+        if welcome_info["channel_id"] is None:
             return
 
-        channel = member.guild.get_channel(channel_id)
+        channel = member.guild.get_channel(welcome_info["channel_id"])
         if channel is None:
             print(f"Cannot welcome {member} to {member.guild.name} (invalid channel)")
             return
 
-        embed = generateEmbed(
+        embed = generate_embed(
                 member,
-                await guilds.db_get_welcome_content(member.guild.id),
-                await guilds.db_get_welcome_image_url(member.guild.id)
+                welcome_info
             )
 
         await channel.send(embed=embed)
 
 
-def generateEmbed(member, content, image_url):
+def generate_embed(member, welcome_info):
+    title = welcome_info["title"]
+    content = welcome_info["content"]
+    image_url = welcome_info["image_url"]
+
+    if title is None:
+        title = "New Member Join"
     if content is None:
         content = "Welcome to {guild}, {member}"
 
+    title = title.replace("{guild}", member.guild.name)
+    title = title.replace("{member}", member.mention)
     content = content.replace("{guild}", member.guild.name)
     content = content.replace("{member}", member.mention)
 
-    embed = discord.Embed(color=0xFE7DFA, title='New Member Join', description=content)
+    embed = discord.Embed(color=0xFE7DFA, title=title, description=content)
     embed.set_thumbnail(url=member.avatar_url)
     if image_url is not None:
         embed.set_image(url=image_url)
