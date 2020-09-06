@@ -8,5 +8,9 @@ def get_guilds_collection():
     return get_database()["guilds"]
 
 
+def get_users_collection():
+    return get_database()["users"]
+
+
 def get_database():
     return client.overall
