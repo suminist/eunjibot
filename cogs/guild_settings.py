@@ -31,5 +31,4 @@ class GuildSettingsCog(commands.Cog):
 
         if message.content.startswith(prefix):
             message.content = message.content.replace(prefix, '~', 1)
-        
-        await self.bot.process_commands(message)
+            await self.bot.process_commands(message)
