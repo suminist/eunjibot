@@ -7,10 +7,22 @@ class WelcomeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def moderator_role_check(ctx):
+        if ctx.author.guild_permissions.administrator is True:
+            return True
+
+        try:
+            moderator_role_id = await guilds.db_get_moderator_role_id(ctx.guild.id)
+            moderator_role = await commands.RoleConverter().convert(ctx, moderator_role_id)
+        except Exception as e:
+            print(e)
+            return False
+
+        return ctx.author.top_role >= moderator_role
+
     @commands.group(case_insensitive=True)
     @commands.guild_only()
-    @commands.bot_has_guild_permissions(ban_members=True)
-    @commands.has_guild_permissions(ban_members=True)
+    @commands.check(moderator_role_check)
     async def welcome(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send('Add more arguments')
