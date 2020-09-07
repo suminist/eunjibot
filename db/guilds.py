@@ -27,6 +27,30 @@ async def db_get_prefix(guild_id):
     return prefix
 
 
+async def db_set_moderator_role_id(guild_id, moderator_role_id):
+    guild_document = await guilds_collection.find_one({"_id": str(guild_id)})
+
+    if guild_document is None:
+        await db_create_new_guild(guild_id, moderator_role_id=moderator_role_id)
+        return
+    else:
+        myquery = {"_id": str(guild_id)}
+        newvalues = guild_document
+        newvalues["moderatorRoleId"] = str(moderator_role_id)
+
+        await guilds_collection.update_one(myquery, {"$set": newvalues})
+        return
+
+
+async def db_get_moderator_role_id(guild_id):
+    guild_document = await guilds_collection.find_one({"_id": str(guild_id)})
+    if guild_document is None:
+        return None
+
+    moderator_role_id = guild_document["moderatorRoleId"]
+    return moderator_role_id
+
+
 async def db_set_welcome(
             guild_id, *,
             welcome_channel_id=None,
@@ -97,6 +121,7 @@ async def db_get_welcome(guild_id):
 async def db_create_new_guild(
             guild_id, *,
             prefix=None,
+            moderator_role_id=None,
             welcome_channel_id=None,
             welcome_title=None,
             welcome_content=None,
@@ -105,6 +130,7 @@ async def db_create_new_guild(
     newvalues = {
         "_id":                  str(guild_id),
         "prefix":               prefix,
+        "moderatorRoleId":      str(moderator_role_id),
         "welcomeChannelId":     str(welcome_channel_id),
         "welcomeTitle":         str(welcome_title),
         "welcomeContent":       str(welcome_content),
