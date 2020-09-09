@@ -21,8 +21,6 @@ class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         try:
             if str(status.user.id) in [self.feeds[x]["_id"] for x in range(0, len(self.feeds))]:
-                print("TRUE")
-                print(status.text)
                 feed = list(filter(lambda feed: feed["_id"] == str(status.user.id), self.feeds))[0]
 
                 tweet_url = f"https://twitter.com/{status.user.screen_name}/status/{status.id}"
