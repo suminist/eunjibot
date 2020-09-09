@@ -39,7 +39,7 @@ class TwitterCog(commands.Cog):
         self.bot = bot
         self.to_update_stream = False
         self.api = None
-        self.key_set = 2
+        self.key_set = 0
         self.feeds = []
         self.tweet_queue = []
         self.initialize.start()
@@ -63,9 +63,6 @@ class TwitterCog(commands.Cog):
         try:
             while len(self.tweet_queue) > 0:
                 tweet = self.tweet_queue[0]
-
-                print("INSIDE HANDLER")
-                print(tweet["url"])
 
                 for channel_id in tweet["channel_ids"]:
                     try:
