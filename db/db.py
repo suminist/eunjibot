@@ -12,5 +12,9 @@ def get_users_collection():
     return get_database()["users"]
 
 
+def get_feeds_twitter_collection():
+    return get_database()["feeds_twitter"]
+
+
 def get_database():
     return client.overall
