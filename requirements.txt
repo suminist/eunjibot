@@ -8,3 +8,4 @@ motor
 dnspython
 igramscraper
 pytz
+tweepy
