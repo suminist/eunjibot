@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from db import guilds
 
-
 class WelcomeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -28,13 +27,13 @@ class WelcomeCog(commands.Cog):
             await ctx.send('Add more arguments')
 
     @welcome.command()
-    async def channel(self, ctx, *args):
-        if len(args) == 0:
+    async def channel(self, ctx, *, channel=""):
+        if channel == "":
             await ctx.send("Please include channel")
             return
 
         try:
-            channel = await commands.TextChannelConverter().convert(ctx, args[0])
+            channel = await commands.TextChannelConverter().convert(ctx, channel)
         except Exception:
             await ctx.send('Invalid text channel.')
             return
