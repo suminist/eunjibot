@@ -43,9 +43,7 @@ class WelcomeCog(commands.Cog):
         await ctx.send(f'Welcome channel is set to {channel.mention}.')
 
     @welcome.command()
-    async def title(self, ctx):
-        title = " ".join(ctx.message.content.split(" ")[2:])
-
+    async def title(self, ctx, *, title=""):
         if title == "":
             await ctx.send("Please include the title")
             return
@@ -62,9 +60,7 @@ class WelcomeCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @welcome.command()
-    async def content(self, ctx):
-        content = " ".join(ctx.message.content.split(" ")[2:])
-
+    async def content(self, ctx, *, content=""):
         if content == "":
             await ctx.send("Please include the content")
             return
@@ -81,9 +77,7 @@ class WelcomeCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @welcome.command()
-    async def image(self, ctx, *args):
-        image_url = " ".join(ctx.message.content.split(" ")[2:])
-
+    async def image(self, ctx, *, image_url=""):
         if image_url == "":
             await ctx.send("Please include the image url")
             return
