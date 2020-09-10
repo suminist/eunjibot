@@ -35,14 +35,24 @@ class MyStreamListener(tweepy.StreamListener):
         print(status)
 
 
+class MyStream(tweepy.Stream):
+    def __init__(self, *args, **kwargs):
+        super(MyStream, self).__init__(*args, **kwargs)
+        self.is_closed = False
+
+    def on_closed(self, resp):
+        self.is_closed = True
+
+
 class TwitterCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.to_update_stream = False
         self.api = None
-        self.key_set = 0
+        self.key_set = 1
         self.feeds = []
         self.tweet_queue = []
+        self.stream = None
         self.initialize.start()
         self.tweet_handler.start()
 
@@ -53,7 +63,7 @@ class TwitterCog(commands.Cog):
             auth.set_access_token(TWT_ACCESS_TOKEN.split(" ")[self.key_set], TWT_ACCESS_TOKEN_SECRET.split(" ")[self.key_set])
             self.api = tweepy.API(auth)
             self.feeds[:] = await feeds_twitter.db_get_feeds()
-            self.stream = tweepy.Stream(auth=self.api.auth, listener=MyStreamListener(self.feeds, self.tweet_queue))
+            self.stream = MyStream(auth=self.api.auth, listener=MyStreamListener(self.feeds, self.tweet_queue))
             self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
             print(self.feeds)
         except Exception:
@@ -127,7 +137,7 @@ class TwitterCog(commands.Cog):
                 auth.set_access_token(TWT_ACCESS_TOKEN.split(" ")[self.key_set], TWT_ACCESS_TOKEN_SECRET.split(" ")[self.key_set])
                 self.api = tweepy.API(auth)
                 self.stream.disconnect()
-                self.stream = tweepy.Stream(auth=self.api.auth, listener=MyStreamListener(self.feeds, self.tweet_queue))
+                self.stream = MyStream(auth=self.api.auth, listener=MyStreamListener(self.feeds, self.tweet_queue))
                 self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
         elif result is False:
             self.feeds[:] = await feeds_twitter.db_get_feeds()
@@ -180,6 +190,13 @@ class TwitterCog(commands.Cog):
                     response = response + f'`{feed_counter}` Following `{user.screen_name}` in <#{feed_channel_id}>\n'
 
         await ctx.send(response)
+
+    @twitter.command()
+    async def status(self, ctx):
+        if self.stream.is_closed:
+            await ctx.send("Stream is closed")
+        else:
+            await ctx.send("Stream is open")
 
 
 async def pause_until(dt):
