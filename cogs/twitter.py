@@ -6,6 +6,7 @@ import traceback
 import asyncio
 from datetime import datetime, date, timedelta
 import pytz
+import shlex
 
 from secret_keys import TWT_CONSUMER_KEY, TWT_CONSUMER_SECRET, TWT_ACCESS_TOKEN, TWT_ACCESS_TOKEN_SECRET
 
@@ -83,7 +84,9 @@ class TwitterCog(commands.Cog):
             await ctx.send('Add more arguments')
 
     @twitter.command()
-    async def add(self, ctx, *args):
+    async def add(self, ctx, *, arg=""):
+        args = shlex.split(arg)
+
         if len(args) != 2:
             await ctx.send('Invalid arguments. Please do `twitter add <username> <text channel>`')
             return
@@ -161,7 +164,7 @@ class TwitterCog(commands.Cog):
         self.feeds[:] = await feeds_twitter.db_get_feeds()
 
     @twitter.command()
-    async def feeds(self, ctx, *args):
+    async def feeds(self, ctx):
         self.feeds[:] = await feeds_twitter.db_get_feeds()
         guild_channels = ctx.guild.channels
         guild_channels_ids = [str(guild_channels[x].id) for x in range(0, len(guild_channels))]
