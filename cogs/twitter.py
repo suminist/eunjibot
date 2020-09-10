@@ -128,9 +128,9 @@ class TwitterCog(commands.Cog):
                 self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
         elif result is False:
             self.feeds[:] = await feeds_twitter.db_get_feeds()
+            await ctx.send(f'{ctx.guild.me.mention} will now update new tweets of `{user.screen_name}` to {channel.mention}.')
         else:
             await ctx.send('Already existing.')
-
 
     @twitter.command()
     async def delete(self, ctx, *args):
@@ -154,9 +154,8 @@ class TwitterCog(commands.Cog):
                 if feed_channel_id in guild_channels_ids:
                     feed_counter += 1
                     if str(feed_counter) in args:
-                        channel = guild_channels[guild_channels_ids.index(feed_channel_id)]
-                        await feeds_twitter.db_delete_feed(user.id, channel.id)
-                        response = response + f'`{feed_counter}` Stopped following `{user.screen_name}` in {channel.mention}\n'
+                        await feeds_twitter.db_delete_feed(user.id, feed_channel_id)
+                        response = response + f'`{feed_counter}` Stopped following `{user.screen_name}` in <#{feed_channel_id}>\n'
 
         await ctx.send(response)
         self.feeds[:] = await feeds_twitter.db_get_feeds()
@@ -174,9 +173,8 @@ class TwitterCog(commands.Cog):
             for feed_channel_id in feed['channelIds']:
                 if feed_channel_id in guild_channels_ids:
                     feed_counter += 1
-                    channel = guild_channels[guild_channels_ids.index(feed_channel_id)]
                     user = self.api.get_user(feed["_id"])
-                    response = response + f'`{feed_counter}` Following `{user.screen_name}` in {channel.mention}\n'
+                    response = response + f'`{feed_counter}` Following `{user.screen_name}` in <#{feed_channel_id}>\n'
 
         await ctx.send(response)
 
