@@ -326,11 +326,14 @@ def _embed_recent(username, page):
     content = ''
     time_now = datetime.utcnow()
     for track in data['recenttracks']['track']:
+        if '@attr' in track.keys() and page != 1:
+            continue
+
         content += '`*` '
         content += f"[{track['name']} by {track['artist']['#text']} ]({quote(track['url']).replace('%3A',':')}) "
 
         if '@attr' in track.keys():
-            content += f"- *Now Playing*\n"
+            content += "- *Now Playing*\n"
         else:
             time_track = datetime.utcfromtimestamp(int(track['date']['uts']))
             time_diff = time_now - time_track
