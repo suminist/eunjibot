@@ -1,50 +1,14 @@
-import discord
 from discord.ext import commands, tasks
 from db import feeds_twitter
 import tweepy
 import traceback
-import asyncio
-from datetime import datetime, date, timedelta
-import pytz
 import shlex
 
-import threading
+from threading import Thread
+from queue import Queue
+from asyncio import Event, sleep
 
 from secret_keys import TWT_CONSUMER_KEY, TWT_CONSUMER_SECRET, TWT_ACCESS_TOKEN, TWT_ACCESS_TOKEN_SECRET
-
-
-class MyStreamListener(tweepy.StreamListener):
-    def __init__(self, feeds, tweet_queue):
-        super(MyStreamListener, self).__init__()
-        self.feeds = feeds
-        self.tweet_queue = tweet_queue
-
-    def on_status(self, status):
-        try:
-            if str(status.user.id) in [self.feeds[x]["_id"] for x in range(0, len(self.feeds))]:
-                feed = list(filter(lambda feed: feed["_id"] == str(status.user.id), self.feeds))[0]
-
-                tweet_url = f"https://twitter.com/{status.user.screen_name}/status/{status.id}"
-                channel_ids = feed["channelIds"]
-
-                self.tweet_queue.append({"url": tweet_url, "channel_ids": channel_ids})
-        except Exception:
-            traceback.print_exc()
-
-    def on_error(self, status):
-        print(status)
-
-
-class MyStream(tweepy.Stream):
-    def _start(self, is_async):
-        self.running = True
-        if is_async:
-            self._thread = threading.Thread(target=self._run)
-            self._thread.daemon = self.daemon
-            self._thread.name = "twitter_streaming_thread"
-            self._thread.start()
-        else:
-            self._run()
 
 
 class TwitterCog(commands.Cog):
@@ -54,30 +18,28 @@ class TwitterCog(commands.Cog):
         self.api = None
         self.key_set = 1
         self.feeds = []
-        self.tweet_queue = []
         self.stream = None
+        self.tweet_queue = Queue()
+        self.tweet_event = Event()
         self.initialize.start()
         self.tweet_handler.start()
-        self.check_stream_status.start()
 
     @tasks.loop(count=1)
     async def initialize(self):
         try:
-            auth = tweepy.OAuthHandler(TWT_CONSUMER_KEY.split(" ")[self.key_set], TWT_CONSUMER_SECRET.split(" ")[self.key_set])
-            auth.set_access_token(TWT_ACCESS_TOKEN.split(" ")[self.key_set], TWT_ACCESS_TOKEN_SECRET.split(" ")[self.key_set])
-            self.api = tweepy.API(auth)
-            self.feeds[:] = await feeds_twitter.db_get_feeds()
-            self.stream = MyStream(auth=self.api.auth, listener=MyStreamListener(self.feeds, self.tweet_queue))
-            self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
-            print(self.feeds)
+            await self.update_feeds()
+            self.restart_stream()
+
         except Exception:
             traceback.print_exc()
 
-    @tasks.loop(seconds=1)
+    @tasks.loop(seconds=0)
     async def tweet_handler(self):
         try:
-            while len(self.tweet_queue) > 0:
-                tweet = self.tweet_queue[0]
+            await self.tweet_event.wait()
+            print("enter")
+            while self.tweet_queue.qsize() > 0:
+                tweet = self.tweet_queue.get()
 
                 for channel_id in tweet["channel_ids"]:
                     try:
@@ -86,41 +48,12 @@ class TwitterCog(commands.Cog):
                     except Exception:
                         print(f'Cannot post in channel {channel_id}')
 
-                self.tweet_queue.remove(tweet)
+            self.tweet_event.clear()
 
         except Exception:
             traceback.print_exc()
 
-    @tasks.loop(seconds=5)
-    async def check_stream_status(self):
-        try:
-            if self.stream is None:
-                return
-
-            thread_names = []
-            for thread in threading.enumerate():
-                thread_names.append(thread.name)
-
-            if "twitter_streaming_thread" not in thread_names:
-                print("UPDATED STREAM BECAUSE IT CRASHED")
-                self.to_update_stream = False
-
-                if self.key_set == 2:
-                    self.key_set = 0
-                else:
-                    self.key_set += 1
-
-                auth = tweepy.OAuthHandler(TWT_CONSUMER_KEY.split(" ")[self.key_set], TWT_CONSUMER_SECRET.split(" ")[self.key_set])
-                auth.set_access_token(TWT_ACCESS_TOKEN.split(" ")[self.key_set], TWT_ACCESS_TOKEN_SECRET.split(" ")[self.key_set])
-                self.api = tweepy.API(auth)
-                self.stream.disconnect()
-                self.stream = MyStream(auth=self.api.auth, listener=MyStreamListener(self.feeds, self.tweet_queue))
-                self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
-
-        except Exception:
-            traceback.print_exc()
-
-    @commands.group(case_insensitive=True)
+    @commands.group(case_insensitive=True, aliases=["twt"])
     @commands.guild_only()
     async def twitter(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -150,38 +83,31 @@ class TwitterCog(commands.Cog):
         result = await feeds_twitter.db_add_feed(user.id, channel.id)
         print(result)
         if result is True:
-            await ctx.send(f'{ctx.guild.me.mention} will now update new tweets of `{user.screen_name}` to {channel.mention}.')
+            await ctx.send(
+                f'{ctx.guild.me.mention} will now update new tweets of `{user.screen_name}` to {channel.mention}.'
+            )
 
             self.to_update_stream = True
-            self.feeds[:] = await feeds_twitter.db_get_feeds()
 
-            await asyncio.sleep(20)
+            await sleep(20)
+            await self.update_feeds()
 
             if self.to_update_stream:
-                print("UPDATED STREAM")
-                self.to_update_stream = False
+                self.restart_stream()
 
-                if self.key_set == 2:
-                    self.key_set = 0
-                else:
-                    self.key_set += 1
-
-                auth = tweepy.OAuthHandler(TWT_CONSUMER_KEY.split(" ")[self.key_set], TWT_CONSUMER_SECRET.split(" ")[self.key_set])
-                auth.set_access_token(TWT_ACCESS_TOKEN.split(" ")[self.key_set], TWT_ACCESS_TOKEN_SECRET.split(" ")[self.key_set])
-                self.api = tweepy.API(auth)
-                self.stream.disconnect()
-                self.stream = MyStream(auth=self.api.auth, listener=MyStreamListener(self.feeds, self.tweet_queue))
-                self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
         elif result is False:
-            self.feeds[:] = await feeds_twitter.db_get_feeds()
-            await ctx.send(f'{ctx.guild.me.mention} will now update new tweets of `{user.screen_name}` to {channel.mention}.')
+            await self.update_feeds()
+            await ctx.send(
+                f'{ctx.guild.me.mention} will now update new tweets of `{user.screen_name}` to {channel.mention}.'
+            )
+
         else:
             await ctx.send('Already existing.')
 
     @twitter.command()
     async def delete(self, ctx, *args):
         if len(args) == 0:
-            await ctx.send('Please include the feed numbers to delete `instagram delete <feed number> <feed number> ...`\nYou can use `instagram list` to list the feeds.')
+            await ctx.send('Please include the feed numbers to delete `twitter delete <feed number> <feed number> ...`\nYou can use `twitter feeds` to list the feeds.')
             return
 
         self.feeds[:] = await feeds_twitter.db_get_feeds()
@@ -204,7 +130,7 @@ class TwitterCog(commands.Cog):
                         response = response + f'`{feed_counter}` Stopped following `{user.screen_name}` in <#{feed_channel_id}>\n'
 
         await ctx.send(response)
-        self.feeds[:] = await feeds_twitter.db_get_feeds()
+        await self.update_feeds()
 
     @twitter.command()
     async def feeds(self, ctx):
@@ -224,31 +150,82 @@ class TwitterCog(commands.Cog):
 
         await ctx.send(response)
 
-    @twitter.command()
-    async def status(self, ctx):
-        thread_names = []
-        for thread in threading.enumerate():
-            thread_names.append(thread.name)
+    async def update_feeds(self):
+        self.feeds[:] = await feeds_twitter.db_get_feeds()
 
-        if "twitter_streaming_thread" in thread_names:
-            await ctx.send("Stream is open")
+    def restart_stream(self):
+        print("Updated stream")
+        self.to_update_stream = False
+
+        if self.key_set == 2:
+            self.key_set = 0
         else:
-            await ctx.send("Stream is closed")
+            self.key_set += 1
+
+        auth = tweepy.OAuthHandler(
+            TWT_CONSUMER_KEY.split(" ")[self.key_set],
+            TWT_CONSUMER_SECRET.split(" ")[self.key_set]
+        )
+        auth.set_access_token(
+            TWT_ACCESS_TOKEN.split(" ")[self.key_set],
+            TWT_ACCESS_TOKEN_SECRET.split(" ")[self.key_set]
+        )
+        self.api = tweepy.API(auth)
+
+        if self.stream is not None:
+            self.stream.disconnect()
+
+        self.stream = MyStream(
+            twitter_cog=self,
+            auth=self.api.auth,
+            listener=MyStreamListener(self.feeds, self.tweet_queue, self.tweet_event)
+        )
+        self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
 
 
-async def pause_until(dt):
+class MyStreamListener(tweepy.StreamListener):
+    def __init__(self, feeds, tweet_queue, tweet_event):
+        super(MyStreamListener, self).__init__()
+        self.feeds = feeds
+        self.tweet_queue = tweet_queue
+        self.tweet_event = tweet_event
 
-    end = dt.timestamp()
-    # Now we wait
-    while True:
-        now = datetime.utcnow().replace(tzinfo=pytz.utc).timestamp()
-        diff = end - now
+    def on_status(self, status):
+        try:
+            if str(status.user.id) in [self.feeds[x]["_id"] for x in range(0, len(self.feeds))]:
+                feed = list(filter(lambda feed: feed["_id"] == str(status.user.id), self.feeds))[0]
 
-        #
-        # Time is up!
-        #
-        if diff <= 0:
-            break
+                tweet_url = f"https://twitter.com/{status.user.screen_name}/status/{status.id}"
+                channel_ids = feed["channelIds"]
+
+                self.tweet_queue.put({"url": tweet_url, "channel_ids": channel_ids})
+                self.tweet_event.set()
+
+        except Exception:
+            traceback.print_exc()
+
+    def on_error(self, status):
+        print(status)
+
+
+class MyStream(tweepy.Stream):
+    def __init__(self, twitter_cog, *args, **kwargs):
+        super(MyStream, self).__init__(*args, **kwargs)
+        self.twitter_cog = twitter_cog
+
+    def _start(self, is_async):
+        self.running = True
+        if is_async:
+            self._thread = Thread(target=self._run)
+            self._thread.daemon = self.daemon
+            self._thread.name = "twitter_streaming_thread"
+            self._thread.start()
         else:
-            # 'logarithmic' sleeping to minimize loop iterations
-            await asyncio.sleep(diff / 2)
+            self._run()
+
+    def _run(self):
+        try:
+            super(MyStream, self)._run()
+        except BaseException:
+            print("Streaming thread crashed")
+            self.twitter_cog.restart_stream()
