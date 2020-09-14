@@ -37,7 +37,6 @@ class TwitterCog(commands.Cog):
     async def tweet_handler(self):
         try:
             await self.tweet_event.wait()
-            print("enter")
             while self.tweet_queue.qsize() > 0:
                 tweet = self.tweet_queue.get()
 
