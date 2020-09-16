@@ -25,8 +25,8 @@ class TwitterCog(commands.Cog):
         self.stream = None
         self.tweet_queue = Queue()
         self.tweet_event = Event()
-        #self.initialize.start()
-        #self.tweet_handler.start()
+        self.initialize.start()
+        self.tweet_handler.start()
 
     @tasks.loop(count=1)
     async def initialize(self):
