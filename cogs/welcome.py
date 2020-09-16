@@ -28,7 +28,7 @@ class WelcomeCog(commands.Cog):
     @commands.check(moderator_role_check)
     async def welcome(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send('Add more arguments')
+            await ctx.invoke(self.preview)
 
     @welcome.command(
         description="Set the channel for welcome greetings",
