@@ -19,9 +19,14 @@ from secret_keys import MONGODB_CONNECTION
 import pymongo
 cluster = pymongo.MongoClient(MONGODB_CONNECTION)
 
+
 class MiscCog(commands.Cog):
+    """
+    Miscellaneous stuff that leek likes
+    """
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "Miscellaneous"
         self.krupdate_loop.start()
 
     @commands.command()

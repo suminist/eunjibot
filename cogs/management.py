@@ -4,10 +4,18 @@ from db import guilds
 
 
 class ManagementCog(commands.Cog):
+    """
+    Management stuff. kick/ban/mute
+    """
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "Management"
 
-    @commands.command()
+    @commands.command(
+        description="Ban a user",
+        usage="Args:\n" +
+              "- User"
+    )
     @commands.guild_only()
     @commands.bot_has_guild_permissions(ban_members=True)
     @commands.has_guild_permissions(ban_members=True)
@@ -34,7 +42,11 @@ class ManagementCog(commands.Cog):
             await ctx.send(e)
             return
 
-    @commands.command()
+    @commands.command(
+        description="Kick a user",
+        usage="Args:\n" +
+              "- User"
+    )
     @commands.guild_only()
     @commands.bot_has_guild_permissions(kick_members=True)
     @commands.has_guild_permissions(kick_members=True)
@@ -60,7 +72,11 @@ class ManagementCog(commands.Cog):
             await ctx.send(e)
             return
 
-    @commands.command()
+    @commands.command(
+        description="Mute a user. Idk if this works",
+        usage="Args:\n" +
+              "- User"
+    )
     @commands.guild_only()
     @commands.bot_has_guild_permissions(manage_roles=True)
     @commands.has_guild_permissions(manage_roles=True)
@@ -108,7 +124,11 @@ class ManagementCog(commands.Cog):
             await ctx.send(e)
             return
 
-    @commands.command()
+    @commands.command(
+        description="Purge messages in the current channel",
+        usage="Args:\n" +
+              "- Amount of messages"
+    )
     @commands.guild_only()
     @commands.has_guild_permissions(administrator=True)
     async def purge(self, ctx, *args):
@@ -138,30 +158,6 @@ class ManagementCog(commands.Cog):
         except Exception as e:
             await ctx.send(e)
             return
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.has_guild_permissions(administrator=True)
-    async def modrole(self, ctx, *args):
-        if len(args) == 0:
-            try:
-                moderator_role_id = await guilds.db_get_moderator_role_id(ctx.guild.id)
-                moderator_role = await commands.RoleConverter().convert(ctx, moderator_role_id)
-                await ctx.send(f"The current moderator role is {moderator_role.mention}")
-            except Exception as e:
-                await ctx.send("There is no moderator role")
-
-            return
-
-        try:
-            moderator_role = await commands.RoleConverter().convert(ctx, args[0])
-        except Exception as e:
-            print(e)
-            await ctx.send("Invalid role")
-            return
-
-        await guilds.db_set_moderator_role_id(ctx.guild.id, moderator_role.id)
-        await ctx.send(f"{moderator_role.mention} set as moderator role for this server.")
 
     # @commands.Cog.listener()
     # async def on_command_error(self, ctx, error):

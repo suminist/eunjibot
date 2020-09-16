@@ -1,5 +1,5 @@
 from discord.ext import commands, tasks
-from db import feeds_twitter
+from db import feeds_twitter, guilds
 import tweepy
 import traceback
 import shlex
@@ -12,12 +12,16 @@ from secret_keys import TWT_CONSUMER_KEY, TWT_CONSUMER_SECRET, TWT_ACCESS_TOKEN,
 
 
 class TwitterCog(commands.Cog):
+    """
+    Follow twitter feeds
+    """
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "Twitter"
         self.to_update_stream = False
         self.api = None
         self.key_set = 1
-        self.feeds = []
+        self.feeds_list = []
         self.stream = None
         self.tweet_queue = Queue()
         self.tweet_event = Event()
@@ -52,13 +56,32 @@ class TwitterCog(commands.Cog):
         except Exception:
             traceback.print_exc()
 
-    @commands.group(case_insensitive=True, aliases=["twt"])
+    async def moderator_role_check(ctx):
+        if ctx.author.guild_permissions.administrator is True:
+            return True
+
+        try:
+            moderator_role_id = await guilds.db_get_moderator_role_id(ctx.guild.id)
+            moderator_role = await commands.RoleConverter().convert(ctx, moderator_role_id)
+        except Exception as e:
+            print(e)
+            return False
+
+        return ctx.author.top_role >= moderator_role
+
+    @commands.group(case_insensitive=True)
     @commands.guild_only()
+    @commands.check(moderator_role_check)
     async def twitter(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send('Add more arguments')
+            await ctx.invoke(self.feeds)
 
-    @twitter.command()
+    @twitter.command(
+        description="Follow a user to a discord channel",
+        usage="Args:\n" +
+              "- Twitter username\n" +
+              "- Text channel"
+    )
     async def add(self, ctx, *, arg=""):
         args = shlex.split(arg)
 
@@ -103,20 +126,25 @@ class TwitterCog(commands.Cog):
         else:
             await ctx.send('Already existing.')
 
-    @twitter.command()
+    @twitter.command(
+        description="Stop selected feeds. Get the index needed using `feeds`.\n" +
+                    "For example `twitter delete 1 2 3 4` will delete feeds 1, 2, 3, and 4.",
+        usage="Args:\n" +
+              "- Feed index/es"
+    )
     async def delete(self, ctx, *args):
         if len(args) == 0:
             await ctx.send('Please include the feed numbers to delete `twitter delete <feed number> <feed number> ...`\nYou can use `twitter feeds` to list the feeds.')
             return
 
-        self.feeds[:] = await feeds_twitter.db_get_feeds()
+        self.feeds_list[:] = await feeds_twitter.db_get_feeds()
         guild_channels = ctx.guild.channels
         guild_channels_ids = [str(guild_channels[x].id) for x in range(0, len(guild_channels))]
 
         response = 'Stopped following:\n'
 
         feed_counter = 0
-        for feed in self.feeds:
+        for feed in self.feeds_list:
             try:
                 user = self.api.get_user(id=feed["_id"])
             except Exception:
@@ -131,16 +159,19 @@ class TwitterCog(commands.Cog):
         await ctx.send(response)
         await self.update_feeds()
 
-    @twitter.command()
+    @twitter.command(
+        description="List all the twitter feeds in this server",
+        usage="Args: None"
+    )
     async def feeds(self, ctx):
-        self.feeds[:] = await feeds_twitter.db_get_feeds()
+        self.feeds_list[:] = await feeds_twitter.db_get_feeds()
         guild_channels = ctx.guild.channels
         guild_channels_ids = [str(guild_channels[x].id) for x in range(0, len(guild_channels))]
 
         response = f'Followed accounts for `{ctx.guild.name}`:\n'
 
         feed_counter = 0
-        for feed in self.feeds:
+        for feed in self.feeds_list:
             for feed_channel_id in feed['channelIds']:
                 if feed_channel_id in guild_channels_ids:
                     feed_counter += 1
@@ -150,7 +181,7 @@ class TwitterCog(commands.Cog):
         await ctx.send(response)
 
     async def update_feeds(self):
-        self.feeds[:] = await feeds_twitter.db_get_feeds()
+        self.feeds_list[:] = await feeds_twitter.db_get_feeds()
 
     def restart_stream(self):
         print("Updated stream")
@@ -177,22 +208,22 @@ class TwitterCog(commands.Cog):
         self.stream = MyStream(
             twitter_cog=self,
             auth=self.api.auth,
-            listener=MyStreamListener(self.feeds, self.tweet_queue, self.tweet_event)
+            listener=MyStreamListener(self.feeds_list, self.tweet_queue, self.tweet_event)
         )
-        self.stream.filter(follow=[self.feeds[x]["_id"] for x in range(0, len(self.feeds))], is_async=True)
+        self.stream.filter(follow=[self.feeds_list[x]["_id"] for x in range(0, len(self.feeds_list))], is_async=True)
 
 
 class MyStreamListener(tweepy.StreamListener):
-    def __init__(self, feeds, tweet_queue, tweet_event):
+    def __init__(self, feeds_list, tweet_queue, tweet_event):
         super(MyStreamListener, self).__init__()
-        self.feeds = feeds
+        self.feeds_list = feeds_list
         self.tweet_queue = tweet_queue
         self.tweet_event = tweet_event
 
     def on_status(self, status):
         try:
-            if str(status.user.id) in [self.feeds[x]["_id"] for x in range(0, len(self.feeds))]:
-                feed = list(filter(lambda feed: feed["_id"] == str(status.user.id), self.feeds))[0]
+            if str(status.user.id) in [self.feeds_list[x]["_id"] for x in range(0, len(self.feeds_list))]:
+                feed = list(filter(lambda feed: feed["_id"] == str(status.user.id), self.feeds_list))[0]
 
                 tweet_url = f"https://twitter.com/{status.user.screen_name}/status/{status.id}"
                 channel_ids = feed["channelIds"]
