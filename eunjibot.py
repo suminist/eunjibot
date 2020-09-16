@@ -19,6 +19,7 @@ async def blank(*args):
 client = commands.Bot(command_prefix = '~', activity = discord.Game("Eunji bot under development"), case_insensitive=True)
 client.on_message = blank
 
+client.remove_command('help')
 client.add_cog(ManagementCog(client))
 client.add_cog(LastFmCog(client))
 client.add_cog(MiscCog(client))
@@ -26,7 +27,6 @@ client.add_cog(WeatherCog(client))
 client.add_cog(InfoCog(client))
 client.add_cog(WelcomeCog(client))
 client.add_cog(TwitterCog(client))
-client.remove_command('help')
 #client.add_cog(InstagramCog(client))
 
 client.add_cog(GuildSettingsCog(client))
