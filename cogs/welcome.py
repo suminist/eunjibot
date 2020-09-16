@@ -3,8 +3,12 @@ from discord.ext import commands
 from db import guilds
 
 class WelcomeCog(commands.Cog):
+    """
+    For setting welcome message greeting
+    """
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "Welcome"
 
     async def moderator_role_check(ctx):
         if ctx.author.guild_permissions.administrator is True:
@@ -26,7 +30,11 @@ class WelcomeCog(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send('Add more arguments')
 
-    @welcome.command()
+    @welcome.command(
+        description="Set the channel for welcome greetings",
+        usage="Args:\n" +
+              "- Text channel"
+    )
     async def channel(self, ctx, *, channel=""):
         if channel == "":
             await ctx.send("Please include channel")
@@ -41,7 +49,11 @@ class WelcomeCog(commands.Cog):
         await guilds.db_set_welcome(ctx.guild.id, welcome_channel_id=channel.id)
         await ctx.send(f'Welcome channel is set to {channel.mention}.')
 
-    @welcome.command()
+    @welcome.command(
+        description="Set the title for the welcome embed",
+        usage="Args:\n" +
+              "- Title"
+    )
     async def title(self, ctx, *, title=""):
         if title == "":
             await ctx.send("Please include the title")
@@ -58,7 +70,11 @@ class WelcomeCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @welcome.command()
+    @welcome.command(
+        description="Set the content for the welcome embed",
+        usage="Args:\n" +
+              "- Content"
+    )
     async def content(self, ctx, *, content=""):
         if content == "":
             await ctx.send("Please include the content")
@@ -75,7 +91,11 @@ class WelcomeCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @welcome.command()
+    @welcome.command(
+        description="Set the image URL for the welcome embed",
+        usage="Args:\n" +
+              "- Image URL"
+    )
     async def image(self, ctx, *, image_url=""):
         if image_url == "":
             await ctx.send("Please include the image url")
@@ -97,7 +117,10 @@ class WelcomeCog(commands.Cog):
             await guilds.db_set_welcome(ctx.guild.id, welcome_image_url="None")
             await ctx.send("Invalid image URL")
 
-    @welcome.command()
+    @welcome.command(
+        description="Preview the welcome embed",
+        usage="Args: None"
+    )
     async def preview(self, ctx):
         welcome_info = await guilds.db_get_welcome(ctx.guild.id)
 
