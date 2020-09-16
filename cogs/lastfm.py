@@ -11,8 +11,12 @@ import discord
 from discord.ext import commands
 
 class LastFmCog(commands.Cog):
+    """
+    LastFM stuff
+    """
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "LastFM"
 
     @commands.command(aliases=['lf'])
     async def lastfm(self, ctx, *args):
