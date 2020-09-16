@@ -5,9 +5,14 @@ import json
 
 from secret_keys import OPENWEATHER_API_KEY
 
+
 class WeatherCog(commands.Cog):
+    """
+    Ugly weather feature
+    """
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "Weather"
 
     @commands.command()
     @commands.guild_only()
