@@ -178,9 +178,6 @@ class MiscCog(commands.Cog):
         elif 'thanks eunji' in msg_n:
             await message.channel.send(f"you're welcome {splt} :)")
 
-        elif '<@!707455402744217610>' in msg_n:
-            await message.channel.send("I'm busy right now :/ ping me again later")
-
         elif 'sing' in msg_n and 'eunji' in msg_n:
             videos = [
                 'https://www.youtube.com/watch?v=nzDO6tAB6ng',
