@@ -141,8 +141,9 @@ class TwitterCog(commands.Cog):
         guild_channels = ctx.guild.channels
         guild_channels_ids = [str(guild_channels[x].id) for x in range(0, len(guild_channels))]
 
-        response = 'Stopped following:\n'
+        response = ""
 
+        deleted_feed_counter = 0
         feed_counter = 0
         for feed in self.feeds_list:
             try:
@@ -155,6 +156,14 @@ class TwitterCog(commands.Cog):
                     if str(feed_counter) in args:
                         await feeds_twitter.db_delete_feed(user.id, feed_channel_id)
                         response = response + f'`{feed_counter}` Stopped following `{user.screen_name}` in <#{feed_channel_id}>\n'
+                        deleted_feed_counter += 1
+
+        if deleted_feed_counter == 0:
+            response = "Deleted nothing. Make sure your feed numbers are correct.\n" +\
+                    "Use `twitter feeds` to see the feed numbers.\n" +\
+                    "Then use `twitter delete 1 5` to delete feeds 1, and 5, for example"
+        else:
+            response = 'Stopped following:\n' + response
 
         await ctx.send(response)
         await self.update_feeds()
