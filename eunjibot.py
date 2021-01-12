@@ -13,10 +13,12 @@ from cogs.welcome import WelcomeCog
 
 from secret_keys import DISCORD_BOT_TOKEN
 
+intents = discord.Intents.all()
+
 async def blank(*args):
     pass
 
-client = commands.Bot(command_prefix = '~', activity = discord.Game("Eunji bot under development"), case_insensitive=True)
+client = commands.Bot(command_prefix = '~', activity = discord.Game("Eunji bot under development"), case_insensitive=True, intents=intents)
 client.on_message = blank
 
 client.remove_command('help')
