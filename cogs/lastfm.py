@@ -5,11 +5,19 @@ from discord.ext import commands
 import requests
 import json
 from bs4 import BeautifulSoup as bSoup
-from secret_keys import LF_API_KEY, LF_API_SECRET
+from secret_keys import LF_API_KEY, GENIUS_CLIENT_KEY
 from db import users
 
-import discord
-from discord.ext import commands
+import os
+import calendar
+import time
+
+from lyricsgenius import Genius
+from hangul_romanize import Transliter
+from hangul_romanize.rule import academic
+
+transliter = Transliter(academic)
+genius = Genius(GENIUS_CLIENT_KEY)
 
 
 class LastFmCog(commands.Cog):
@@ -67,12 +75,80 @@ class LastFmCog(commands.Cog):
             await self._now_playing(ctx, args[1:], user)
         elif args[0] in ['set']:
             await self._set_username(ctx, args[1:])
+        elif args[0] in ['lyrics']:
+            if len(mentioned_users) == 0:
+                user = ctx.author
+            else:
+                user = mentioned_users[0]
+            await self._lyrics(ctx, args[1:], user)
         else:
             if len(mentioned_users) == 0:
                 user = ctx.author
             else:
                 user = mentioned_users[0]
             await self._now_playing(ctx, args[1:], user)
+
+    async def _lyrics(self, ctx, args, user):
+        username = await users.db_get_lf_username(user.id)
+
+        if username is None:
+            await ctx.send('Please register your username with `lf set username`')
+            return
+
+        response = requests.get(
+            f'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={username}&api_key={LF_API_KEY}&limit=1&page=1&format=json')
+        data = json.loads(response.text)
+
+        if '@attr' in data['recenttracks']['track'][0].keys():
+            pass
+        else:
+            await ctx.send("No current track")
+            return
+
+        for track in data['recenttracks']['track'][:1]:
+            title = track['name']
+            artist = track['artist']['#text']
+
+            song = genius.search_song(
+                title=title, artist=artist)
+
+            if not song:
+                await ctx.send("Can't find lyrics of the track")
+                return
+
+            if "original" in args:
+                output = song.lyrics
+            else:
+                output = transliter.translit(song.lyrics)
+
+            if "m" in args:
+                await ctx.send(f"**Lyrics for {title} by {artist}:**")
+
+                length = len(output)
+                sent_length = 0
+
+                while sent_length < length:
+                    if len(output[sent_length:sent_length +
+                                  2000]) < 2000:
+
+                        await ctx.send(output[sent_length:sent_length+2000])
+                        break
+                    else:
+                        last_new_line = output[sent_length:sent_length +
+                                               2000].rfind("\n")
+                        await ctx.send(output[sent_length:sent_length+last_new_line])
+
+                    sent_length += last_new_line
+
+            else:
+                cursecs = calendar.timegm(time.gmtime())
+                filename = f"{cursecs}_{title}_{artist}.txt"
+                f = open(filename, "w")
+                f.write(output)
+                f.close()
+
+                await ctx.send(f"Lyrics for {title} by {artist}:", file=discord.File(filename, "lyrics.txt"))
+                os.remove(filename)
 
     async def _top_artists(self, ctx, args, user):
         username = await users.db_get_lf_username(user.id)
