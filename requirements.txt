@@ -9,3 +9,5 @@ dnspython
 igramscraper
 pytz
 tweepy
+lyricsgenius
+hangul-romanize
