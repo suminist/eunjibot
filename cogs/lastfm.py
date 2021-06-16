@@ -109,17 +109,43 @@ class LastFmCog(commands.Cog):
             title = track['name']
             artist = track['artist']['#text']
 
-            song = genius.search_song(
-                title=title, artist=artist)
+            while True:
+                if "r" in args:
+                    song = genius.search_song(
+                        title=title+" romanized", artist=artist)
+                    if song:
+                        break
+
+                    song = genius.search_song(
+                        title=title, artist=artist)
+                    if song:
+                        await ctx.send("Can't find romanized version of the track. Will try to romanize manually...")
+                        break
+
+                elif "e" in args:
+                    song = genius.search_song(
+                        title=title+" english", artist=artist)
+                    if song:
+                        break
+
+                    song = genius.search_song(
+                        title=title, artist=artist)
+                    if song:
+                        await ctx.send("Can't find english translation of the track. Will send the original lyrics.")
+                        break
+
+                song = genius.search_song(
+                    title=title, artist=artist)
+                break
 
             if not song:
                 await ctx.send("Can't find lyrics of the track")
                 return
 
-            if "original" in args:
-                output = song.lyrics
-            else:
+            if "r" in args:
                 output = transliter.translit(song.lyrics)
+            else:
+                output = song.lyrics
 
             if "m" in args:
                 await ctx.send(f"**Lyrics for {title} by {artist}:**")
@@ -147,7 +173,7 @@ class LastFmCog(commands.Cog):
                 f.write(output)
                 f.close()
 
-                await ctx.send(f"Lyrics for {title} by {artist}:", file=discord.File(filename, "lyrics.txt"))
+                await ctx.send(f"Lyrics for {title} by {artist}:", file=discord.File(filename, f"{title} by {artist}.txt"))
                 os.remove(filename)
 
     async def _top_artists(self, ctx, args, user):
