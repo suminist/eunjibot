@@ -110,7 +110,7 @@ class LastFmCog(commands.Cog):
             artist = track['artist']['#text']
 
             while True:
-                if "r" in args:
+                if "rom" in args:
                     song = genius.search_song(
                         title=title+" romanized", artist=artist)
                     if song:
@@ -120,9 +120,9 @@ class LastFmCog(commands.Cog):
                         title=title, artist=artist)
                     if song:
                         await ctx.send("Can't find romanized version of the track. Will try to romanize manually...")
-                        break
+                    break
 
-                elif "e" in args:
+                elif "eng" in args:
                     song = genius.search_song(
                         title=title+" english", artist=artist)
                     if song:
@@ -132,7 +132,7 @@ class LastFmCog(commands.Cog):
                         title=title, artist=artist)
                     if song:
                         await ctx.send("Can't find english translation of the track. Will send the original lyrics.")
-                        break
+                    break
 
                 song = genius.search_song(
                     title=title, artist=artist)
@@ -142,12 +142,12 @@ class LastFmCog(commands.Cog):
                 await ctx.send("Can't find lyrics of the track")
                 return
 
-            if "r" in args:
+            if "rom" in args:
                 output = transliter.translit(song.lyrics)
             else:
                 output = song.lyrics
 
-            if "m" in args:
+            if "plain" in args:
                 await ctx.send(f"**Lyrics for {title} by {artist}:**")
 
                 length = len(output)
