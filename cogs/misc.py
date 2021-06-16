@@ -7,7 +7,7 @@ import json
 from bs4 import BeautifulSoup as bSoup
 import requests
 import time
-import operator 
+import operator
 from functools import reduce
 from datetime import datetime, date, timedelta
 import pytz
@@ -24,6 +24,7 @@ class MiscCog(commands.Cog):
     """
     Miscellaneous stuff that leek likes
     """
+
     def __init__(self, bot):
         self.bot = bot
         self.__cog_name__ = "Miscellaneous"
@@ -51,12 +52,12 @@ class MiscCog(commands.Cog):
             'Mcdonalds'
         ]
         await ctx.send(random.choice(lunch))
-    
+
     @commands.command()
     @commands.guild_only()
     async def apink(self, ctx, *, msg):
 
-        members= ['eunji', 'bomi', 'hayoung', 'naeun', 'namjoo', 'chorong']
+        members = ['eunji', 'bomi', 'hayoung', 'naeun', 'namjoo', 'chorong']
 
         for mem in members:
             if str(msg.lower()) == mem:
@@ -66,19 +67,21 @@ class MiscCog(commands.Cog):
                 source = requests.get(link).text
                 soup = bSoup(source, 'lxml')
 
-                kp_f = soup.find('div', class_='entry-content').p.text #print these facts
+                # print these facts
+                kp_f = soup.find('div', class_='entry-content').p.text
 
                 kp_jpg = soup.find('div', class_='entry-content').img
-                kp_src = kp_jpg['src'] #print this image
+                kp_src = kp_jpg['src']  # print this image
 
                 embed_kp = discord.Embed(
-                    title = emb_title,
-                    color = 0x29FFCE
+                    title=emb_title,
+                    color=0x29FFCE
                 )
 
                 embed_kp.add_field(name='Info', value=kp_f)
                 embed_kp.set_image(url=kp_src)
-                embed_kp.add_field(name='Profile Link', value=link, inline=False)
+                embed_kp.add_field(name='Profile Link',
+                                   value=link, inline=False)
 
                 await ctx.send(embed=embed_kp)
                 break
@@ -88,47 +91,48 @@ class MiscCog(commands.Cog):
     async def izone(self, ctx, *, msg):
 
         izone = {
-        'chaeyeon': 'https://kprofiles.com/lee-chaeyeon-izone-profile-facts/',
-        'eunbi': 'https://kprofiles.com/kwon-eunbi-izone-profile-facts/',
-        'sakura': 'https://kprofiles.com/miyawaki-sakura-izonehkt48-profile-facts/',
-        'hyewon': 'https://kprofiles.com/kang-hyewon-izone-profile-facts/',
-        'yena': 'https://kprofiles.com/choi-yena-izone-profile-facts/',
-        'chaewon': 'https://kprofiles.com/kim-chaewon-profile-facts/',
+            'chaeyeon': 'https://kprofiles.com/lee-chaeyeon-izone-profile-facts/',
+            'eunbi': 'https://kprofiles.com/kwon-eunbi-izone-profile-facts/',
+            'sakura': 'https://kprofiles.com/miyawaki-sakura-izonehkt48-profile-facts/',
+            'hyewon': 'https://kprofiles.com/kang-hyewon-izone-profile-facts/',
+            'yena': 'https://kprofiles.com/choi-yena-izone-profile-facts/',
+            'chaewon': 'https://kprofiles.com/kim-chaewon-profile-facts/',
 
-        'minjoo': 'https://kprofiles.com/kim-minjoo-izone-profile-facts/',
-        'minju': 'https://kprofiles.com/kim-minjoo-izone-profile-facts/',
-        
-        'nako': 'https://kprofiles.com/yabuki-nako-izonehkt48-profile-facts/',
-        'hitomi': 'https://kprofiles.com/honda-hitomi-izoneakb48-profile-facts/',
-        'yuri': 'https://kprofiles.com/jo-yuri-izone-profile-facts/',
-        'yujin': 'https://kprofiles.com/ahn-yujin-izone-profile-facts/',
-        'wonyoung': 'https://kprofiles.com/jang-wonyoung-izone-profile-facts/'
+            'minjoo': 'https://kprofiles.com/kim-minjoo-izone-profile-facts/',
+            'minju': 'https://kprofiles.com/kim-minjoo-izone-profile-facts/',
+
+            'nako': 'https://kprofiles.com/yabuki-nako-izonehkt48-profile-facts/',
+            'hitomi': 'https://kprofiles.com/honda-hitomi-izoneakb48-profile-facts/',
+            'yuri': 'https://kprofiles.com/jo-yuri-izone-profile-facts/',
+            'yujin': 'https://kprofiles.com/ahn-yujin-izone-profile-facts/',
+            'wonyoung': 'https://kprofiles.com/jang-wonyoung-izone-profile-facts/'
         }
 
         link = izone.get(msg.lower())
 
         if link == None:
-            await ctx.send('Oops, maybe spelt something wrong?') 
-        
+            await ctx.send('Oops, maybe spelt something wrong?')
+
         else:
             emb_title = 'Member Profile'
 
             source = requests.get(link).text
             soup = bSoup(source, 'lxml')
 
-            kp_f = soup.find('div', class_='entry-content').p.text #print these facts
+            # print these facts
+            kp_f = soup.find('div', class_='entry-content').p.text
 
             kp_jpg = soup.find('div', class_='entry-content').img
-            kp_src = kp_jpg['src'] #print this image
+            kp_src = kp_jpg['src']  # print this image
 
             embed_kp = discord.Embed(
-                title = emb_title,
-                color = 0xD609DD
+                title=emb_title,
+                color=0xD609DD
             )
 
             embed_kp.add_field(name='Info', value=kp_f)
             embed_kp.set_image(url=kp_src)
-            embed_kp.add_field(name='Profile Link', value=link, inline=False)    
+            embed_kp.add_field(name='Profile Link', value=link, inline=False)
 
             await ctx.send(embed=embed_kp)
 
@@ -136,33 +140,36 @@ class MiscCog(commands.Cog):
     @commands.guild_only()
     async def helpme(self, ctx):
         embed = discord.Embed(
-            title = 'List of Commands',
-            description = 'Bot Prefix: -',
-            color = 0x65E1F0
+            title='List of Commands',
+            description='Bot Prefix: -',
+            color=0x65E1F0
         )
         embed.add_field(name='emb1', value='Posts Jeong Eunji', inline=False)
-        embed.add_field(name='form1', value='Sends you a little form', inline=False)
-        embed.add_field(name='goodnight', value='Sends you 1 out of 2 goodnight gif', inline=False)
-        embed.add_field(name='latestcb', value='Sends the latest girl/girl group comeback', inline=False)
+        embed.add_field(
+            name='form1', value='Sends you a little form', inline=False)
+        embed.add_field(
+            name='goodnight', value='Sends you 1 out of 2 goodnight gif', inline=False)
+        embed.add_field(
+            name='latestcb', value='Sends the latest girl/girl group comeback', inline=False)
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message):
         #print(f'Message from {message.author.id} in channel {message.channel.id} in server {message.guild.id}')
-        #print(message.content)
+        # print(message.content)
 
-        splt = str(message.author.display_name) #nickname
+        splt = str(message.author.display_name)  # nickname
         # tag_id = str(message.author.id)         #discord ID
-        msg_n = message.content.lower()    #message.content
+        msg_n = message.content.lower()  # message.content
 
-        if 'is high' in msg_n: #easter egg
+        if 'is high' in msg_n:  # easter egg
             await message.channel.send('https://www.youtube.com/watch?v=fpSTrry_5Fo')
         elif 'the best girl' in msg_n:
             await message.channel.send("It's me", delete_after=1)
         elif 'i love you eunji' in msg_n:
             await message.channel.send(f'i love you too {splt} :flushed:')
-            await message.add_reaction('\N{HEAVY BLACK HEART}') 
-            
+            await message.add_reaction('\N{HEAVY BLACK HEART}')
+
         elif 'depressed' in msg_n:
             await message.channel.send(f"its ok {splt}, I'll be there for you")
             await message.channel.send('<:eunjiface:707716555538038875>')
@@ -172,7 +179,7 @@ class MiscCog(commands.Cog):
                 await message.channel.send(f'*kisses {splt}*')
             else:
                 await message.channel.send(f'*hugs {splt}*')
-                
+
             await message.channel.send('<:pandahug:707726416065593355>')
 
         elif 'thanks eunji' in msg_n:
@@ -199,11 +206,11 @@ class MiscCog(commands.Cog):
 
         msgn = str(summoner)
 
-        op_gg = msgn.split()        
+        op_gg = msgn.split()
 
         if len(op_gg) > 1:
             username = msgn.replace(' ', '+')
-        
+
         elif len(op_gg) == 1:
             username = msgn
 
@@ -234,25 +241,25 @@ class MiscCog(commands.Cog):
 
             db = cluster['minjubot']
             krbot = db['hyewonfragrant']
-            
-            channel = self.bot.get_channel(723401657148244009)
-            channel2 = self.bot.get_channel(743562872025514075)
+
+            channels = [self.bot.get_channel(
+                723401657148244009), self.bot.get_channel(743562872025514075), self.bot.get_channel(723574110143381534)]
             url = 'https://www.koreanclass101.com/korean-phrases/'
-            headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
+            headers = {
+                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
             source = requests.get(url, headers=headers).text
             soup = bSoup(source, 'lxml')
 
             wode = soup.find('div', class_='r101-wotd-widget__english').text
 
             wtd = []
-            ix = krbot.find({'index':'qfind'})
+            ix = krbot.find({'index': 'qfind'})
 
             for item in ix:
                 wtd.append(item['krword'])
             twod = ''.join(wtd)
 
             today = date.today()
-            await channel.send(f"```css\n{today} - Korean word of the day with examples```")
             wodxa = soup.find_all('div', class_='r101-wotd-widget__word')
             wodexa = soup.find_all('div', class_='r101-wotd-widget__english')
             ewords = []
@@ -274,19 +281,20 @@ class MiscCog(commands.Cog):
                         pass
                     else:
                         carrot += f'{blist}\n'
-            
-            await channel.send(carrot)
-            await channel2.send(carrot)
+
+            for channel in channels:
+                await channel.send(f"```css\n{today} - Korean word of the day with examples```")
+                await channel.send(carrot)
             if twod == '':
-                newvalues = { 'index':'qfind', 'krword':wode}
+                newvalues = {'index': 'qfind', 'krword': wode}
                 krbot.insert_one(newvalues)
             else:
-                query = {'index':'qfind'}
-                krbot.update_one(query, {'$set':{'krword':wode}})
+                query = {'index': 'qfind'}
+                krbot.update_one(query, {'$set': {'krword': wode}})
 
             while self._kr_next_update_dt < datetime.utcnow().replace(tzinfo=pytz.utc):
                 self._kr_next_update_dt += timedelta(days=1)
-        
+
         except Exception as e:
             traceback.print_exc()
 
@@ -294,7 +302,7 @@ class MiscCog(commands.Cog):
     async def before_printer(self):
         await self.bot.wait_until_ready()
         self._kr_next_update_dt = datetime(2020, 7, 17, 15, 3, 0, 0, pytz.utc)
-        
+
         while self._kr_next_update_dt < datetime.utcnow().replace(tzinfo=pytz.utc):
             self._kr_next_update_dt += timedelta(days=1)
 
@@ -305,14 +313,15 @@ class MiscCog(commands.Cog):
         krbot = db['hyewonfragrant']
 
         url = 'https://www.koreanclass101.com/korean-phrases/'
-        headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
         source = requests.get(url, headers=headers).text
         soup = bSoup(source, 'lxml')
 
         wode = soup.find('div', class_='r101-wotd-widget__english').text
 
         wtd = []
-        ix = krbot.find({'index':'qfind'})
+        ix = krbot.find({'index': 'qfind'})
 
         for item in ix:
             wtd.append(item['krword'])
@@ -344,15 +353,15 @@ class MiscCog(commands.Cog):
                         pass
                     else:
                         carrot += f'{blist}\n'
-            
+
             await ctx.send(carrot)
 
             if twod == '':
-                newvalues = { 'index':'qfind', 'krword':wode}
+                newvalues = {'index': 'qfind', 'krword': wode}
                 krbot.insert_one(newvalues)
             else:
-                query = {'index':'qfind'}
-                krbot.update_one(query, {'$set':{'krword':wode}})
+                query = {'index': 'qfind'}
+                krbot.update_one(query, {'$set': {'krword': wode}})
 
         await ctx.message.delete()
 
