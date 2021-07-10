@@ -39,6 +39,13 @@ class MiscCog(commands.Cog):
             'https://tenor.com/view/iu-sleep-sleepy-sleeping-tired-gif-12177560'
         ]
         await ctx.send(random.choice(iuwu))
+        
+    @commands.command()
+    @commands.guild_only()
+    async def admin(self, ctx, *args):
+        if args[0] == "command":
+            if args[1] == "001":
+                await ctx.send(f"Hello {ctx.author.name}, please specify nuclear launch codes to proceed.")
 
     @commands.command()
     @commands.guild_only()
