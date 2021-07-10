@@ -18,7 +18,7 @@ intents = discord.Intents.all()
 async def blank(*args):
     pass
 
-client = commands.Bot(command_prefix = '~', activity = discord.Game("Eunji bot under development"), case_insensitive=True, intents=intents)
+client = commands.Bot(command_prefix = '~', activity = discord.Game("Siwoo Cute"), case_insensitive=True, intents=intents)
 client.on_message = blank
 
 client.remove_command('help')
