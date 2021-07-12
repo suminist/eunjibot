@@ -1,10 +1,10 @@
-from secret_keys import GENIUS_CLIENT_KEY
 import calendar
 import discord
 import os
 import time
-
 from lyricsgenius import Genius
+
+from secret_keys import GENIUS_CLIENT_KEY
 
 genius = Genius(GENIUS_CLIENT_KEY)
 
