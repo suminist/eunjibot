@@ -1,5 +1,3 @@
-import os
-import time
 from datetime import datetime
 from urllib.parse import quote
 import discord
@@ -26,6 +24,24 @@ class LastFmCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.__cog_name__ = "LastFM"
+
+    @commands.command()
+    async def lyrics(self, ctx, *args):
+        new_args = ' '.join(args).split('|')
+        title = new_args[0]
+        label = f"Lyrics for {title}"
+
+        if len(new_args) > 1:
+            artist = new_args[1]
+            label += f" by {artist}"
+        else:
+            artist = ""
+        if len(new_args) > 2:
+            plain = new_args[2] == "plain"
+        else:
+            plain = False
+
+        await send_lyrics(ctx.channel, label, get_lyrics(title, artist), plain)
 
     @commands.command(aliases=['lf'])
     async def lastfm(self, ctx, *args):
