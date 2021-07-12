@@ -1,23 +1,19 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from urllib.parse import quote
 import discord
 from discord.ext import commands
 import requests
 import json
-from bs4 import BeautifulSoup as bSoup
-from secret_keys import LF_API_KEY, GENIUS_CLIENT_KEY
-from db import users
-
-import os
-import calendar
-import time
-
-from lyricsgenius import Genius
 from hangul_romanize import Transliter
 from hangul_romanize.rule import academic
+from bs4 import BeautifulSoup as bSoup
+
+from db import users
+from secret_keys import LF_API_KEY
+from utils.lyrics import get_lyrics, send_lyrics
+
 
 transliter = Transliter(academic)
-genius = Genius(GENIUS_CLIENT_KEY)
 
 
 class LastFmCog(commands.Cog):
@@ -28,6 +24,24 @@ class LastFmCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.__cog_name__ = "LastFM"
+
+    @commands.command()
+    async def lyrics(self, ctx, *args):
+        new_args = ' '.join(args).split('|')
+        title = new_args[0]
+        label = f"Lyrics for {title}"
+
+        if len(new_args) > 1:
+            artist = new_args[1]
+            label += f" by {artist}"
+        else:
+            artist = ""
+        if len(new_args) > 2:
+            plain = new_args[2] == "plain"
+        else:
+            plain = False
+
+        await send_lyrics(ctx.channel, label, get_lyrics(title, artist), plain)
 
     @commands.command(aliases=['lf'])
     async def lastfm(self, ctx, *args):
@@ -111,70 +125,44 @@ class LastFmCog(commands.Cog):
 
             while True:
                 if "rom" in args:
-                    song = genius.search_song(
+                    lyrics = get_lyrics(
                         title=title+" romanized", artist=artist)
-                    if song:
+                    if lyrics:
                         break
 
-                    song = genius.search_song(
+                    lyrics = get_lyrics(
                         title=title, artist=artist)
-                    if song:
+                    if lyrics:
                         await ctx.send("Can't find romanized version of the track. Will try to romanize manually...")
                     break
 
                 elif "eng" in args:
-                    song = genius.search_song(
+                    lyrics = get_lyrics(
                         title=title+" english", artist=artist)
-                    if song:
+                    if lyrics:
                         break
 
-                    song = genius.search_song(
+                    lyrics = get_lyrics(
                         title=title, artist=artist)
-                    if song:
+                    if lyrics:
                         await ctx.send("Can't find english translation of the track. Will send the original lyrics.")
                     break
 
-                song = genius.search_song(
+                lyrics = get_lyrics(
                     title=title, artist=artist)
                 break
 
-            if not song:
+            if not lyrics:
                 await ctx.send("Can't find lyrics of the track")
                 return
 
             if "rom" in args:
-                output = transliter.translit(song.lyrics)
+                output = transliter.translit(lyrics)
             else:
-                output = song.lyrics
+                output = lyrics
 
-            if "plain" in args:
-                await ctx.send(f"**Lyrics for {title} by {artist}:**")
-
-                length = len(output)
-                sent_length = 0
-
-                while sent_length < length:
-                    if len(output[sent_length:sent_length +
-                                  2000]) < 2000:
-
-                        await ctx.send(output[sent_length:sent_length+2000])
-                        break
-                    else:
-                        last_new_line = output[sent_length:sent_length +
-                                               2000].rfind("\n")
-                        await ctx.send(output[sent_length:sent_length+last_new_line])
-
-                    sent_length += last_new_line
-
-            else:
-                cursecs = calendar.timegm(time.gmtime())
-                filename = f"{cursecs}_{title}_{artist}.txt"
-                f = open(filename, "w")
-                f.write(output)
-                f.close()
-
-                await ctx.send(f"Lyrics for {title} by {artist}:", file=discord.File(filename, f"{title} by {artist}.txt"))
-                os.remove(filename)
+            await send_lyrics(
+                ctx.channel, f"Lyrics for {title} by {artist}:", output, plain="plain" in args)
 
     async def _top_artists(self, ctx, args, user):
         username = await users.db_get_lf_username(user.id)
