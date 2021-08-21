@@ -161,49 +161,6 @@ class MiscCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_message(self, message):
-        #print(f'Message from {message.author.id} in channel {message.channel.id} in server {message.guild.id}')
-        # print(message.content)
-
-        splt = str(message.author.display_name)  # nickname
-        # tag_id = str(message.author.id)         #discord ID
-        msg_n = message.content.lower()  # message.content
-
-        if 'is high' in msg_n:  # easter egg
-            await message.channel.send('https://www.youtube.com/watch?v=fpSTrry_5Fo')
-        elif 'the best girl' in msg_n:
-            await message.channel.send("It's me", delete_after=1)
-        elif 'i love you eunji' in msg_n:
-            await message.channel.send(f'i love you too {splt} :flushed:')
-            await message.add_reaction('\N{HEAVY BLACK HEART}')
-
-        elif 'depressed' in msg_n:
-            await message.channel.send(f"its ok {splt}, I'll be there for you")
-            await message.channel.send('<:eunjiface:707716555538038875>')
-
-        elif 'hug me' in msg_n:
-            if message.author.id == 382915421071736852:
-                await message.channel.send(f'*kisses {splt}*')
-            else:
-                await message.channel.send(f'*hugs {splt}*')
-
-            await message.channel.send('<:pandahug:707726416065593355>')
-
-        elif 'thanks eunji' in msg_n:
-            await message.channel.send(f"you're welcome {splt} :)")
-
-        elif 'sing' in msg_n and 'eunji' in msg_n:
-            videos = [
-                'https://www.youtube.com/watch?v=nzDO6tAB6ng',
-                'https://www.youtube.com/watch?v=PWDISJZr7Yc',
-                'https://www.youtube.com/watch?v=tUUk7ktOy4Y',
-                'https://www.youtube.com/watch?v=S20j3sTDZT0',
-                'https://www.youtube.com/watch?v=ugh3W-D-tqk',
-                'https://www.youtube.com/watch?v=otrquLJGX6c'
-            ]
-            await message.channel.send(random.choice(videos))
-
-    @commands.Cog.listener()
     async def on_ready(self):
         print('<<<<<=====<>=====<>=====Eunjibot Online=====<>=====<>=====>>>>>')
 
@@ -250,7 +207,7 @@ class MiscCog(commands.Cog):
             krbot = db['hyewonfragrant']
 
             channels = [self.bot.get_channel(
-                723401657148244009), self.bot.get_channel(743562872025514075), self.bot.get_channel(564352023928242186)]
+                723401657148244009), self.bot.get_channel(743562872025514075)]
             url = 'https://www.koreanclass101.com/korean-phrases/'
             headers = {
                 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko)Version/12.1.1 Safari/605.1.15'}
