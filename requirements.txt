@@ -8,6 +8,6 @@ motor
 dnspython
 igramscraper
 pytz
-tweepy
+tweepy==3.10.0
 lyricsgenius
 hangul-romanize
