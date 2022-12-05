@@ -1,5 +1,5 @@
 beautifulsoup4
-discord.py
+discord.py==1.7.2
 requests
 lxml
 python-dotenv
