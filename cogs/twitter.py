@@ -15,6 +15,7 @@ class TwitterCog(commands.Cog):
     """
     Follow twitter feeds
     """
+
     def __init__(self, bot):
         self.bot = bot
         self.__cog_name__ = "Twitter"
@@ -139,7 +140,8 @@ class TwitterCog(commands.Cog):
 
         self.feeds_list[:] = await feeds_twitter.db_get_feeds()
         guild_channels = ctx.guild.channels
-        guild_channels_ids = [str(guild_channels[x].id) for x in range(0, len(guild_channels))]
+        guild_channels_ids = [str(guild_channels[x].id)
+                              for x in range(0, len(guild_channels))]
 
         response = ""
 
@@ -155,13 +157,14 @@ class TwitterCog(commands.Cog):
                     feed_counter += 1
                     if str(feed_counter) in args:
                         await feeds_twitter.db_delete_feed(user.id, feed_channel_id)
-                        response = response + f'`{feed_counter}` Stopped following `{user.screen_name}` in <#{feed_channel_id}>\n'
+                        response = response + \
+                            f'`{feed_counter}` Stopped following `{user.screen_name}` in <#{feed_channel_id}>\n'
                         deleted_feed_counter += 1
 
         if deleted_feed_counter == 0:
             response = "Deleted nothing. Make sure your feed numbers are correct.\n" +\
-                    "Use `twitter feeds` to see the feed numbers.\n" +\
-                    "Then use `twitter delete 1 5` to delete feeds 1, and 5, for example"
+                "Use `twitter feeds` to see the feed numbers.\n" +\
+                "Then use `twitter delete 1 5` to delete feeds 1, and 5, for example"
         else:
             response = 'Stopped following:\n' + response
 
@@ -175,7 +178,8 @@ class TwitterCog(commands.Cog):
     async def feeds(self, ctx):
         self.feeds_list[:] = await feeds_twitter.db_get_feeds()
         guild_channels = ctx.guild.channels
-        guild_channels_ids = [str(guild_channels[x].id) for x in range(0, len(guild_channels))]
+        guild_channels_ids = [str(guild_channels[x].id)
+                              for x in range(0, len(guild_channels))]
 
         response = f'Followed accounts for `{ctx.guild.name}`:\n'
 
@@ -184,8 +188,14 @@ class TwitterCog(commands.Cog):
             for feed_channel_id in feed['channelIds']:
                 if feed_channel_id in guild_channels_ids:
                     feed_counter += 1
-                    user = self.api.get_user(feed["_id"])
-                    response = response + f'`{feed_counter}` Following `{user.screen_name}` in <#{feed_channel_id}>\n'
+
+                    try:
+                        user = self.api.get_user(id=feed["_id"])
+                        response = response + \
+                            f'`{feed_counter}` Following `{user.screen_name}` in <#{feed_channel_id}>\n'
+
+                    except Exception:
+                        traceback.print_exc()
 
         await ctx.send(response)
 
@@ -217,9 +227,11 @@ class TwitterCog(commands.Cog):
         self.stream = MyStream(
             twitter_cog=self,
             auth=self.api.auth,
-            listener=MyStreamListener(self.feeds_list, self.tweet_queue, self.tweet_event)
+            listener=MyStreamListener(
+                self.feeds_list, self.tweet_queue, self.tweet_event)
         )
-        self.stream.filter(follow=[self.feeds_list[x]["_id"] for x in range(0, len(self.feeds_list))], is_async=True)
+        self.stream.filter(follow=[self.feeds_list[x]["_id"]
+                           for x in range(0, len(self.feeds_list))], is_async=True)
 
 
 class MyStreamListener(tweepy.StreamListener):
@@ -232,12 +244,14 @@ class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         try:
             if str(status.user.id) in [self.feeds_list[x]["_id"] for x in range(0, len(self.feeds_list))]:
-                feed = list(filter(lambda feed: feed["_id"] == str(status.user.id), self.feeds_list))[0]
+                feed = list(filter(lambda feed: feed["_id"] == str(
+                    status.user.id), self.feeds_list))[0]
 
                 tweet_url = f"https://twitter.com/{status.user.screen_name}/status/{status.id}"
                 channel_ids = feed["channelIds"]
 
-                self.tweet_queue.put({"url": tweet_url, "channel_ids": channel_ids})
+                self.tweet_queue.put(
+                    {"url": tweet_url, "channel_ids": channel_ids})
                 self.tweet_event.set()
 
         except Exception:
